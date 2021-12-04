@@ -60,10 +60,12 @@ LCR_BRKENB = 0b01000000 ; Enable break
 LCR_DIVLTC = 0b10000000 ; Divisor Latch
 
 ; The corresponding ssty configuration is:
-; "speed 4800 baud;" cs8 cstopb parenb -parodd -cmspar -hupcl clocal cread crtscts
+; "speed 4800 baud;" cs8 cstopb parenb -parodd -cmspar -hupcl clocal cread crtscts -onlcr
 LCR_CONFIG = LCR_CS8 | LCR_STOPB2 | LCR_PARENB | LCR_PAREVE | LCR_STIDIS | LCR_BRKDIS
 
 MCR_AUTRTS = 0b00100010 ; Auto CTS/RTS
+MCR_RTSCLR = 0b00000000 ; Clear RTS
+MCR_RTSSET = 0b00000010 ; Set RTS
 
 FCR_FIFDIS = 0b00000000 ; Disable FIFO
 FCR_FIFENB = 0b00000001 ; Enable FIFO
@@ -74,3 +76,5 @@ FCR_RFTL08 = 0b10000000 ; Set receiver FIFO trigger level is 8
 FCR_RFTL14 = 0b11000000 ; Set receiver FIFO trigger level is 14
 
 FCR_CONFIG = FCR_FIFDIS
+
+LSR_DATRDY = 0b00000001 ; Data ready

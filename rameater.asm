@@ -7,46 +7,67 @@
 #include "constants.asm"
 
 ; Banks
-PAGE = 0x0100
 
 #bankdef zeropage { #addr 0x0000, #size 0x0100 }
 #bankdef stack    { #addr 0x0100, #size 0x0100 }
 #bankdef ram      { #addr 0x0200, #size 0x3e00 }
-#bankdef program  { #addr 0x3e00, #size 0x0200, #outp 8 * 0x7d00 }
+#bankdef program  { #addr 0x3000, #size 0x0f00, #outp 8 * 0x7000 }
 #bankdef uart     { #addr 0x4000, #size 0x2000 }
 #bankdef iomux    { #addr 0x6000, #size 0x2000 }
-#bankdef romprg   { #addr 0xfd00, #size 0x0200 }
+#bankdef subprog  { #addr 0x8000, #size 0x0ffa, #outp 8 * 0x0000 }
+#bankdef subvecs  { #addr 0x8ffa, #size 0x0006, #outp 8 * 0x0ffa }
+#bankdef romprg   { #addr 0xf000, #size 0x0f00 }
 #bankdef bootprg  { #addr 0xff00, #size 0x00fa, #outp 8 * 0x7f00 }
 #bankdef vectors  { #addr 0xfffa, #size 0x0006, #outp 8 * 0x7ffa }
 
 #bank program
 program:
 
+#bank subprog
+subprogram:
+subprogram_reset:    ; Dummy subprogram by default
+jmp subprogram       ; Loop forever
+subprogram_nmi:      ; NMI handler
+subprogram_irq:      ; IRQ handler
+rti                  ; Return from interrupt
+
+
+#bank subvecs
+subprgm_nmi_vec:   #d16   subprogram_nmi[7:0] @   subprogram_nmi[15:8] ; Non-maskable interrupt entry point
+subprgm_reset_vec: #d16 subprogram_reset[7:0] @ subprogram_reset[15:8] ; Reset entry point
+subprgm_irq_vec:   #d16   subprogram_irq[7:0] @   subprogram_irq[15:8] ; Maskable interrupt entry point
+
 #bank romprg
-romprg_page0: #res 256
-romprg_page1: #res 256
+rom_program:
 
 #bank bootprg
 rom_reset:
 
-  ; Copy program first page to ram
-  ldx #0x00
-  .ram_copy0:
-  lda romprg_page0, x
-  sta program, x
-  inx
-  bne .ram_copy0
+  lda #rom_program[7:0]   ; Load rom program lower address
+  sta 0                   ; At address 0
+  lda #rom_program[15:8]  ; Load rom program higher address
+  sta 1                   ; At address 1
+  lda #program[7:0]       ; Load ram program lower address
+  sta 2                   ; At address 2
+  lda #program[15:8]      ; Load ram program hight address
+  sta 3                   ; At address 4
 
-  ; Copy program second page to ram
-  ldx #0x00
-  .ram_copy1:
-  lda romprg_page1, x
-  sta program + PAGE, x
-  inx
-  bne .ram_copy1
+  ldx #0x10               ; Loop over 16 pages
+  .page_copy:             ; ...
 
-  ; Jump to the actual reset entry point
-  jmp reset
+  ldy #0x00               ; Loop over 256 bytes
+  .byte_copy:             ; ...
+  lda (0), y              ; Indirect load from address 0
+  sta (2), y              ; Indirect store from address 2
+  iny                     ; Increment Y
+  bne .byte_copy          ; Loop over
+
+  inc 1                   ; Increment higher rom program address
+  inc 3                   ; Increment higher ram program address
+  dex                     ; Decrement X
+  bne .page_copy          ; Loop over
+
+  jmp reset               ; Jump to the actual reset entry point
 
 rom_nmi:
   jmp nmi

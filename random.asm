@@ -1,5 +1,5 @@
 #include "cpu6502.asm"
-#include "eater.asm"
+#include "subeater.asm"
 
 #bank zeropage
 scratch:
