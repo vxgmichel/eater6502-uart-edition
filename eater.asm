@@ -14,6 +14,6 @@
 #bankdef vectors  { #addr 0xfffa, #size 0x6,    #outp 8 * 0x7ffa }
 
 #bank vectors
-#d16   nmi[7:0] @   nmi[15:8] ; Non-maskable interrupt entry point
-#d16 reset[7:0] @ reset[15:8] ; Reset entry point
-#d16   irq[7:0] @   irq[15:8] ; Maskable interrupt entry point
+#d16   le(nmi`16) ; Non-maskable interrupt entry point
+#d16 le(reset`16) ; Reset entry point
+#d16   le(irq`16) ; Maskable interrupt entry point

@@ -33,9 +33,9 @@ rti                  ; Return from interrupt
 
 
 #bank subvecs
-subprgm_nmi_vec:   #d16   subprogram_nmi[7:0] @   subprogram_nmi[15:8] ; Non-maskable interrupt entry point
-subprgm_reset_vec: #d16 subprogram_reset[7:0] @ subprogram_reset[15:8] ; Reset entry point
-subprgm_irq_vec:   #d16   subprogram_irq[7:0] @   subprogram_irq[15:8] ; Maskable interrupt entry point
+subprgm_nmi_vec:   #d16   le(subprogram_nmi`16) ; Non-maskable interrupt entry point
+subprgm_reset_vec: #d16 le(subprogram_reset`16) ; Reset entry point
+subprgm_irq_vec:   #d16   le(subprogram_irq`16) ; Maskable interrupt entry point
 
 #bank romprg
 rom_program:
@@ -76,6 +76,6 @@ rom_irq:
   jmp irq
 
 #bank vectors
-#d16   rom_nmi[7:0] @   rom_nmi[15:8] ; Non-maskable interrupt entry point
-#d16 rom_reset[7:0] @ rom_reset[15:8] ; Reset entry point
-#d16   rom_irq[7:0] @   rom_irq[15:8] ; Maskable interrupt entry point
+#d16   le(rom_nmi`16) ; Non-maskable interrupt entry point
+#d16 le(rom_reset`16) ; Reset entry point
+#d16   le(rom_irq`16) ; Maskable interrupt entry point
