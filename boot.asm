@@ -123,7 +123,8 @@ ready_str:
 #d "\0"
 
 complete_str:
-#d "Transfer complete"
+#d "Transfer        xxxxxxxxxxxxxxxxxxxxxxxx"
+#d "      Complete !"
 #d "\0"
 
 empty_str:
@@ -173,6 +174,8 @@ write_to_rom:
   nop                   ; Let the IO mux do its job
   nop                   ; ...
   nop                   ; ...
+  nop                   ; ...
+  nop                   ; ...
 
   lda #0xaa             ; Program write mode by writing a magic sequence of values to specific addresses
   sta (0x5555 | 0x8000) ; ... Then we have 150 us to write the first byte
@@ -193,6 +196,8 @@ write_to_rom:
   nop                   ; Let the IO mux do its job
   nop                   ; Let the IO mux do its job
   nop                   ; ...
+  nop
+  nop
 
   ldy #0x00             ; Clear Y
   .wait_loop:           ; Loop until write is over
@@ -234,15 +239,18 @@ read_serial:
   ldy #0x00             ; Initialize Y to 0
   ldx #0x40             ; Initialize X to 64
 
+  .byte_loop:           ; Loop over bytes read/write
+
   lda #MCR_RTSSET       ; Set RTS in case it's not already set
   sta UART_MCR          ; Write to MCR
-
-  .byte_loop:           ; Loop over bytes read/write
 
   .wait_ready:          ; Wait data to be available
   lda UART_LSR          ; Load LSR
   and #LSR_DATRDY       ; Keep data ready bit
   beq .wait_ready       ; Wait for data ready
+
+  lda #MCR_RTSCLR       ; Clear RTS
+  sta UART_MCR          ; Write to MCR
 
   lda UART_RBR          ; Read byte
   sta serial_buffer, y  ; Write to serial buffer
@@ -250,8 +258,6 @@ read_serial:
   dex                   ; Decrement X
   bne .byte_loop        ; Loop over bytes
 
-  lda #MCR_RTSCLR       ; Clear RTS
-  sta UART_MCR          ; Write to MCR
 
   pla                   ; Pull Y from the stack
   tay                   ; And transfer it
