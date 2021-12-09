@@ -1,5 +1,6 @@
 ; Banks for subprograms in the 6502 Ben Eater architecture
 
+#include "cpu6502.asm"
 #include "constants.asm"
 
 ; Banks
@@ -14,6 +15,8 @@
 #bankdef romprg   { #addr 0xf000, #size 0x0f00 }
 #bankdef bootprg  { #addr 0xff00, #size 0x00fa }
 #bankdef vectors  { #addr 0xfffa, #size 0x0006 }
+
+#include "zeropage.asm"
 
 #bank subvecs
 #d16   le(nmi`16) ; Non-maskable interrupt entry point

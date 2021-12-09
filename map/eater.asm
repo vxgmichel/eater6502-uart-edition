@@ -1,7 +1,7 @@
 ; Banks for the 6502 Ben Eater architecture
 
+#include "cpu6502.asm"
 #include "constants.asm"
-
 
 ; Banks
 
@@ -12,6 +12,8 @@
 #bankdef iomux    { #addr 0x6000, #size 0x2000 }
 #bankdef program  { #addr 0x8000, #size 0x7ffa, #outp 8 * 0x0000 }
 #bankdef vectors  { #addr 0xfffa, #size 0x6,    #outp 8 * 0x7ffa }
+
+#include "zeropage.asm"
 
 #bank vectors
 #d16   le(nmi`16) ; Non-maskable interrupt entry point

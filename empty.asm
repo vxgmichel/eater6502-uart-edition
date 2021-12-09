@@ -1,5 +1,6 @@
-#include "cpu6502.asm"
-#include "subeater.asm"
+; Empty program
+
+#include "map/subeater.asm"
 
 #bank program
 reset:          ; Dummy program

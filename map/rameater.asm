@@ -4,6 +4,7 @@
 ; before executing it. This allows the program to reprogram the
 ; EPROM if necessary.
 
+#include "cpu6502.asm"
 #include "constants.asm"
 
 ; Banks
@@ -19,6 +20,8 @@
 #bankdef romprg   { #addr 0xf000, #size 0x0f00 }
 #bankdef bootprg  { #addr 0xff00, #size 0x00fa, #outp 8 * 0x7f00 }
 #bankdef vectors  { #addr 0xfffa, #size 0x0006, #outp 8 * 0x7ffa }
+
+#include "zeropage.asm"
 
 #bank program
 program:
