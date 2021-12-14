@@ -110,6 +110,10 @@ uart_read:
 
   .byte_loop:           ; Loop over bytes read/write
 
+  lda UART_LSR          ; Load LSR
+  and #LSR_DATRDY       ; Keep data ready bit
+  bne .data_ready       ; Data is already available
+
   lda #MCR_RTSSET       ; Set RTS in case it's not already set
   sta UART_MCR          ; Write to MCR
 
@@ -121,6 +125,7 @@ uart_read:
   lda #MCR_RTSCLR       ; Clear RTS
   sta UART_MCR          ; Write to MCR
 
+  .data_ready:
   lda UART_RBR          ; Read byte
   sta serial_buffer, y  ; Write to serial buffer
   iny                   ; Increment Y

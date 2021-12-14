@@ -33,6 +33,7 @@ reset:
   jsr lcd_print_str        ; Print ready string
   lda #0b11000000          ; Move cursor to second line
   jsr lcd_instruction      ; Write instruction
+  jsr sleep                ; Wait at least 5 ms for the ROM write protection
 
   lda #serial_buffer[7:0]  ; Load serial buffer lower address
   sta a0                   ; to a0
@@ -51,6 +52,7 @@ reset:
   jsr uart_read            ; Read 64 bytes from serial
   jsr rom_write            ; Write a0 to a2
   lda a2                   ; Increment subprogram lower address
+  clc                      ; Clear carry
   adc #0x40                ; By 64
   sta a2                   ; And write back
   bcc .chunk_write         ; Loop while not overflow

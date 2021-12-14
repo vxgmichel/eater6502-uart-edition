@@ -17,10 +17,6 @@ reset:
   jsr lcd_init
   jsr lcd_clear
 
-  ;jsr sleep
-  ;jsr sleep
-  ;jsr sleep
-
   ; Configure UART
   jsr uart_init
 
