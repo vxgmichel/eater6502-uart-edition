@@ -168,3 +168,44 @@ lcd_print_str:
   pla                   ; Pull Y from the stack
   tay                   ; And transfer it
   rts                   ; Return
+
+
+; Delete a character from the LCD display
+lcd_del_char:
+  jsr lcd_wait        ; Wait for LCD to be ready
+
+  lda #0b00000000     ; Set port B to input
+  sta DDRB            ; Using the DDRB command
+  lda #LCD_RI         ; Configure LCD read instruction
+  sta PORTA           ; Using the port A
+  lda #LCD_RIE        ; Enable LCD read instruction
+  sta PORTA           ; Using the port A
+  lda PORTB           ; Read port B to the accumulator
+  sta s0              ; Store value in s0
+  lda #LCD_RI         ; Clear LCD enable
+  sta PORTA           ; Using port A
+  lda #0b11111111     ; Configure B back to output
+  sta DDRB            ; Using the DDRB command
+
+  dec s0              ; Decrement s0
+  lda s0              ; Load to accumulator
+  ora #0b10000000     ; Prepare command
+  cmp #0xff           ; Compare with -1
+  beq .done           ; Already done
+  jsr lcd_instruction ; Move curor
+
+  lda #" "            ; Load a space
+  jsr lcd_print_char  ; Print space
+
+  lda s0              ; Load to accumulator
+  ora #0b10000000     ; Prepare command
+  jsr lcd_instruction ; Move cursor
+
+  .done:
+  rts
+
+
+; Go to next line on the LCD
+lcd_new_line:
+  ; TODO
+  rts
