@@ -1,6 +1,6 @@
 ; Test script
 
-#include "map/rameater.asm"
+#include "map/eater.asm"
 
 
 ; Allocate a string buffer
@@ -13,73 +13,34 @@ string_buffer: #res 256
 #bank program
 
 reset:
-  ; Init LCD
-  jsr lcd_init
-  jsr lcd_clear
 
-  ; Wait for ROM safety to fade away
-  jsr sleep
+  jsr lcd_init          ; Init LCD
+  jsr lcd_clear         ; Clear lCD
+  jsr sleep             ; Wait for ROM safety to fade away
+  wrw #0x0000 r0        ; Load 0 in word r0
 
-  ; Load 0 in r0-r1
-  lda #0x00
-  sta r0
-  sta r1
+  .main:                ; Main program
 
-  .main:
+  wrw r0 a0             ; Copy value in word r0 to first argument
+  wrw #string_buffer a2 ; Load string buffer as destination
+  jsr to_base10         ; Convert to decimal
 
-  ; Load value a0-a1
-  lda r0
-  sta a0
-  lda r1
-  sta a1
+  wrw #string_buffer a0 ; Load string buffer address as source
+  wrw #rom_data a2      ; Load rom data address as destination
+  jsr rom_write         ; Write to rom
 
-  ; Load destination to a2-a3
-  lda #string_buffer`8
-  sta a2
-  lda #(string_buffer >> 8)`8
-  sta a3
+  jsr lcd_clear         ; Clear LCD
+  jsr lcd_print_str     ; Print string buffer to LCD
+  lda #":"              ; Load a separator
+  jsr lcd_print_char    ; Print the separator
 
-  ; Convert to decimal
-  jsr to_base10
+  wrw #rom_data a0      ; Load rom data address as argument
+  jsr lcd_print_str     ; Print rom data
+  lda #":"              ; Load a separator
+  jsr lcd_print_char    ; Print the separator
 
-  ; Load source
-  lda #string_buffer`8
-  sta a0
-  lda #(string_buffer >> 8)`8
-  sta a1
-
-  ; Write to rom
-  lda #0x00
-  sta a2
-  lda #0x90
-  sta a3
-  jsr rom_write
-
-  ; Print result from ram
-  jsr lcd_clear
-  jsr lcd_print_str
-  lda #":"
-  jsr lcd_print_char
-
-  ; Copy string buffer argument
-  lda a2
-  sta a0
-  lda a3
-  sta a1
-
-  ; Print result from rom
-  jsr lcd_print_str
-  lda #":"
-  jsr lcd_print_char
-
-  ; Increment r0-r1
-  inc r0
-  bne .skip
-  inc r1
-  .skip:
-
-  ; Loop over
-  jmp .main
+  inw r0                ; Increment word in r0
+  jmp .main             ; Loop over
 
 ; Interrupt
 
@@ -92,3 +53,8 @@ irq:
 #include "lib/lcd.asm"
 #include "lib/rom.asm"
 #include "lib/decimal.asm"
+
+; Reserve data
+#align 256  ; Next page
+rom_data:   ; Reserve a page
+#res 256
