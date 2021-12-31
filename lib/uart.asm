@@ -72,7 +72,7 @@ LSR_DATRDY = 0b00000001 ; Data ready
 ; Allocate 64 bytes on the RAM for a global buffer
 
 #bank ram
-serial_buffer: #res 64
+serial_buffer: #res 256
 
 
 ; Add serial functions to the program
@@ -94,38 +94,33 @@ uart_wait_read:
   and #LSR_DATRDY       ; Keep data ready bit
   beq .wait_ready       ; Wait for data ready
 
+  lda #MCR_RTSCLR       ; Clear RTS
+  sta UART_MCR          ; Write to MCR
+
   .done:                ; Done
   rts                   ; return
 
 
-; Read serial and write to address in s0
+; Read one byte from serial
+uart_read_one:
+  jsr uart_wait_read
+  lda UART_RBR
+  rts
+
+; Read A bytes from serial and write to address serial_buffer
 uart_read:
+  sta s0
   txa                   ; Transfer X to A
   pha                   ; And push it onto the stack
   tya                   ; Transfer Y to A
   pha                   ; And push it onto the stack
 
+  lda s0                ; Load argument to
+  tax                   ; Transfer argument to X
   ldy #0x00             ; Initialize Y to 0
-  ldx #0x40             ; Initialize X to 64
 
   .byte_loop:           ; Loop over bytes read/write
-
-  lda UART_LSR          ; Load LSR
-  and #LSR_DATRDY       ; Keep data ready bit
-  bne .data_ready       ; Data is already available
-
-  lda #MCR_RTSSET       ; Set RTS in case it's not already set
-  sta UART_MCR          ; Write to MCR
-
-  .wait_ready:          ; Wait data to be available
-  lda UART_LSR          ; Load LSR
-  and #LSR_DATRDY       ; Keep data ready bit
-  beq .wait_ready       ; Wait for data ready
-
-  lda #MCR_RTSCLR       ; Clear RTS
-  sta UART_MCR          ; Write to MCR
-
-  .data_ready:
+  jsr uart_wait_read    ; Wait for data to be available
   lda UART_RBR          ; Read byte
   sta serial_buffer, y  ; Write to serial buffer
   iny                   ; Increment Y
@@ -136,6 +131,7 @@ uart_read:
   tay                   ; And transfer it
   pla                   ; Pull X from the stack
   tax                   ; And transfer it
+  lda s0                ; Restore argument to A
   rts                   ; Return
 
 

@@ -49,6 +49,7 @@ reset:
   .page_write:             ; ...
 
   .chunk_write:            ; Loop over 4 chunks of 64 bytes
+  lda #0x40                ; Load 64 as argument
   jsr uart_read            ; Read 64 bytes from serial
   jsr rom_write            ; Write a0 to a2
   lda a2                   ; Increment subprogram lower address
