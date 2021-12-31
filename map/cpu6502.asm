@@ -236,3 +236,34 @@
 	txs => 0x9a
 	tya => 0x98
 }
+
+#ruledef cpu6502_helpers
+{
+	; Write single byte from zero-page memory
+    wrb {addr1: u8} {addr2: u8}   => 0xa5 @ addr1 @ 0x85 @ addr2
+    wrb {addr1: u8} {addr2: u16}  => 0xa5 @ addr1 @ 0x8d @ le(addr2)
+
+	; Write single byte from memory
+    wrb {addr1: u16} {addr2: u8}  => 0xad @ le(addr1) @ 0x85 @ addr2
+    wrb {addr1: u16} {addr2: u16} => 0xad @ le(addr1) @ 0x8d @ le(addr2)
+
+    ; Write single byte from immediate
+	wrb #{imm: i8} {addr: u8}  => 0xa9 @ imm @ 0x85 @ addr
+	wrb #{imm: i8} {addr: u16} => 0xa9 @ imm @ 0x8d @ le(addr)
+
+	; Write a 2-byte word from zero-page memory
+	wrw {addr1: u8} {addr2: u8}  => 0xa5 @ addr1 @ 0x85 @ addr2 @ 0xa5 @ (addr1 + 1)`8 @ 0x85 @ (addr2 + 1)`8
+	wrw {addr1: u8} {addr2: u16} => 0xa5 @ addr1 @ 0x8d @ le(addr2) @ 0xa5 @ (addr1 + 1)`8 @ 0x8d @ le((addr2 + 1)`16)
+
+	; Write a 2-byte word from memory
+	wrw {addr1: u16} {addr2: u8}  => 0xad @ le(addr1) @ 0x85 @ addr2 @ 0xad @ (addr1 + 1)`16 @ 0x85 @ (addr2 + 1)`8
+	wrw {addr1: u16} {addr2: u16} => 0xad @ le(addr1) @ 0x8d @ le(addr2) @ 0xad @ (addr1 + 1)`16 @ 0x8d @ le((addr2 + 1)`16)
+
+    ; Write a 2-byte word from immediate
+	wrw #{imm: i16} {addr: u8}  => 0xa9 @ imm[7:0] @0x85 @ addr @ 0xa9 @ imm[15:8] @ 0x85 @ (addr + 1)`8
+	wrw #{imm: i16} {addr: u16} => 0xa9 @ imm[7:0] @0x8d @ le(addr) @ 0xa9 @ imm[15:8] @ 0x8d @ le((addr + 1)`16)
+
+    ; Increment a 2-byte word
+	inw  {zaddr: u8 }    => 0xe6 @ zaddr @ 0xd0 @ 0x02 @ 0xe6 @ (zaddr + 1)`8
+	inw  {addr:  u16}    => 0xee @ le(addr) @ 0xd0 @0x03 @ 0xee @ le((addr + 1)`16)
+}
