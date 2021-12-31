@@ -6,7 +6,7 @@
 ; Run the subprogram
 
 
-#include "map/rameater.asm"
+#include "map/eater.asm"
 
 
 
