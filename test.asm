@@ -118,7 +118,7 @@ reset:
 ; Data
 
 value1_str:
-#d "00000"
+#d "11111"
 #d "\0"
 
 value2_str:

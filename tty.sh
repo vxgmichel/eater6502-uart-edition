@@ -11,7 +11,7 @@ stty -F /dev/ttyUSB0 \
   -hupcl clocal cread crtscts \
   -ocrnl -ofdel -ofill -olcuc -onlcr -onlret -onocr -opost \
   raw 1>/dev/null
-sleep 0.2
+sleep 0.1
 >&2 echo "> tty configured!"
 
 if [ -z $1 ]
