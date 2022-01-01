@@ -1,6 +1,6 @@
 ; Test script
 
-#include "map/eater.asm"
+#include "map/subeater.asm"
 
 
 ; Allocate a string buffer
@@ -55,6 +55,6 @@ irq:
 #include "lib/decimal.asm"
 
 ; Reserve data
-#align 256  ; Next page
-rom_data:   ; Reserve a page
+#align 256 * 8  ; Next page
+rom_data:       ; Reserve a page
 #res 256

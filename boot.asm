@@ -6,7 +6,7 @@
 ; Run the subprogram
 
 
-#include "map/eater.asm"
+#include "map/booteater.asm"
 
 
 
@@ -61,6 +61,11 @@ reset:
 
   lda #"."                 ; Load a dot
   jsr lcd_print_char       ; Print a dot
+  txa                      ; Transfer X to A
+  and #0b00000000001       ; Keep lowest bit
+  eor #0b00000000001       ; Invert it
+  sta PORTA                ; Toggle the LED
+
   inc a3                   ; Increment subprogram higher address
   dex                      ; Decrement X
   bne .page_write          ; Loop until X equals zero
