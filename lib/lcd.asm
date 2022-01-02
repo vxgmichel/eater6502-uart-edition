@@ -45,7 +45,10 @@ lcd_print_num:
   sta s0              ; Save argument in s0
   txa                 ; Transfer X to A
   pha                 ; Push X onto the stack
+  lda r0              ; Load r0
+  pha                 ; And push onto the stack
   lda s0              ; Restore argument in s0
+  sta r0              ; And store to r0
   lsr a               ; Shift 4 times
   lsr a               ; to keep the 4 higher bits
   lsr a               ; ...
@@ -53,11 +56,15 @@ lcd_print_num:
   tax                 ; Transfer A to X
   lda hexa_symbols, x ; Load hexa value corresponding to X
   jsr lcd_print_char  ; Call print_char
-  lda s0              ; Restore original argument
+  lda r0              ; Restore original argument
   and #0b00001111     ; Keep lower 4 bits
   tax                 ; Transfer A to X
   lda hexa_symbols, x ; Load hexa value corresponding to X
   jsr lcd_print_char  ; Call print_char
+  lda r0              ; Load r0
+  sta s0              ; And store to s0
+  pla                 ; Pull r0 from the stack
+  sta r0              ; And restore
   pla                 ; Pull original X from stack
   tax                 ; Restore original X
   lda s0              ; Restore argument in s0
@@ -129,6 +136,7 @@ lcd_instruction:
 ; Print the character in the accumulator to the LCD display
 lcd_print_char:
   jsr lcd_wait    ; Wait for the display to be ready
+  sta s0          ; Save argument to s0
   sta PORTB       ; Write the argument to port B
   lda #LCD_WD     ; Configure LCD write data
   sta PORTA       ; Using port A
@@ -136,6 +144,7 @@ lcd_print_char:
   sta PORTA       ; Using port A
   lda #LCD_WD     ; Clear LCD enable
   sta PORTA       ; Using port A
+  lda s0          ; Restore argument
   rts             ; Return from subroutine
 
 

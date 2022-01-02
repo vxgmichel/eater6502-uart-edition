@@ -79,6 +79,39 @@ serial_buffer: #res 256
 
 #bank program
 
+; Configure the UART receiver
+; Line control configuration:
+; - Baud rate: 4807 Hz (1MHz / 16 / 13)
+; - 8-bit characters
+; - 2 stop bits
+; - Enable even parity
+; - No stick bit
+; - No break
+; FIFO configuration:
+; - Disable FIFO
+uart_init:
+  pha             ; Push A onto the stack
+
+  lda #LCR_DIVLTC  ; Set the divisor latch
+  sta UART_LCR     ; Write to LCR
+
+  lda #0x0d       ; Set the divisor lower byte (13)
+  sta UART_DLL    ; Write to DLL
+  lda #0x00       ; Set the divisor higher byte (0)
+  sta UART_DLM    ; Write to DLM
+
+  lda #LCR_CONFIG ; Configure line control
+  sta UART_LCR    ; Write to LCR
+
+  lda #FCR_CONFIG ; Configure FIFO control
+  sta UART_FCR    ; Write to FCR
+
+  lda #MCR_RTSCLR ; Clear RTS
+  sta UART_MCR    ; Write to MCR
+
+  pla             ; Pull A from the stack
+  rts             ; Return
+
 
 ; Wait for data to be available on serial
 uart_wait_read:
@@ -135,35 +168,72 @@ uart_read:
   rts                   ; Return
 
 
-; Configure the UART receiver
-; Line control configuration:
-; - Baud rate: 4807 Hz (1MHz / 16 / 13)
-; - 8-bit characters
-; - 2 stop bits
-; - Enable even parity
-; - No stick bit
-; - No break
-; FIFO configuration:
-; - Disable FIFO
-uart_init:
-  pha             ; Push A onto the stack
+; Read bytes to a0 until character A is detected
+; Return number of written bytes in A
+uart_readuntil:
+  sta s0              ; Store argument to s0
+  tya                 ; Push Y onto the stack
+  pha                 ;
+  lda r0              ; Push r0 onto the stack
+  pha                 ;
+  lda s0              ; Store argument to r0
+  sta r0              ;
 
-  lda #LCR_DIVLTC  ; Set the divisor latch
-  sta UART_LCR     ; Write to LCR
+  ldy #0x00           ; Initialize Y to 0
+  .byte_loop:         ; Loop over bytes
+  jsr uart_wait_read  ; Wait for data
+  lda UART_RBR        ; Load data
+  sta (a0), y         ; Write to buffer
+  iny                 ; Increment Y
+  cmp r0              ; Compare read value to s0
+  bne .byte_loop      ;
 
-  lda #0x0d       ; Set the divisor lower byte (13)
-  sta UART_DLL    ; Write to DLL
-  lda #0x00       ; Set the divisor higher byte (0)
-  sta UART_DLM    ; Write to DLM
+  lda #0x00           ; Write a null byte
+  sta (a0), y         ; at the end
 
-  lda #LCR_CONFIG ; Configure line control
-  sta UART_LCR    ; Write to LCR
+  tya                 ; Write Y to s0
+  sta s0              ;
+  pla                 ; Restore r0 from the stack
+  sta r0              ;
+  pla                 ; Restore Y from the stack
+  tay                 ;
+  lda s0              ; Load s0
+  rts                 ; Return from subroutine
 
-  lda #FCR_CONFIG ; Configure FIFO control
-  sta UART_FCR    ; Write to FCR
 
-  lda #MCR_RTSCLR ; Clear RTS
-  sta UART_MCR    ; Write to MCR
+; Read bytes to a0 until a line feed is detected
+; Return number of written bytes in A
+uart_readline:
+  lda #"\n"
+  jsr uart_readuntil
+  rts
 
-  pla             ; Pull A from the stack
+
+; Write line from buffer in a0
+uart_writeline:
+  tya             ; Push Y onto the stach
+  pha
+
+  ldy #0x00       ; Initialize Y to 0
+
+  .byte_loop:     ; Loop over bytes
+
+  .wait_ready:
+  lda UART_LSR
+  and #0b01100000
+  beq .wait_ready
+
+  lda (a0), y     ; Load next byte
+  beq .done       ; Done if null byte
+  sta UART_THR    ; Write to UART
+
+  iny             ; Increment Y
+  jmp .byte_loop  ; Loop over bytes
+
+  .done:          ; Done with the loop
+  lda #"\n"       ; Write a line feed
+  sta UART_THR    ; to UART
+
+  pla             ; Restore Y
+  tay             ;
   rts             ; Return

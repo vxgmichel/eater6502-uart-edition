@@ -10,7 +10,7 @@ stty -F /dev/ttyUSB0 \
   cs8 cstopb parenb -parodd -cmspar \
   -hupcl clocal cread crtscts \
   -ocrnl -ofdel -ofill -olcuc -onlcr -onlret -onocr -opost \
-  raw 1>/dev/null
+  raw -echo 1>/dev/null
 sleep 0.1
 >&2 echo "> tty configured!"
 
@@ -24,7 +24,7 @@ then
     >&2 echo "> writing $1 bytes to tty..."
     { cat; cat /dev/zero; } | head -c $1 > /dev/ttyUSB0
     >&2 echo "> tty written!"
+else
+    >&2 echo "> reading from tty..."
+    stdbuf -i0 -o0 -e0 cat /dev/ttyUSB0
 fi
-
->&2 echo "> reading from tty..."
-stdbuf -i0 -o0 -e0 cat /dev/ttyUSB0

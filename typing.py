@@ -37,7 +37,7 @@ stty -F /dev/ttyUSB0 \
   cs8 cstopb parenb -parodd -cmspar \
   -hupcl clocal cread crtscts \
   -ocrnl -ofdel -ofill -olcuc -onlcr -onlret -onocr -opost \
-  raw""", shell=True, check=True, capture_output=True)
+  raw -echo""", shell=True, check=True, capture_output=True)
     with raw_stdin():
         with open("/dev/ttyUSB0", "wb", buffering=0) as serial:
             while True:
