@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+"""
+Communicate with ttyUSB0 by successively sending and receiving a line.
+"""
+
 import sys
 import subprocess
 
