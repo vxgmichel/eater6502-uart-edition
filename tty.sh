@@ -16,9 +16,12 @@ sleep 0.1
 
 if [ -z $1 ]
 then
+    trap 'kill 0' EXIT
+    cat /dev/ttyUSB0&
     >&2 echo "> writing to tty..."
     cat > /dev/ttyUSB0
     >&2 echo "> tty written!"
+    wait
 elif [ ! $1 -eq 0 ]
 then
     >&2 echo "> writing $1 bytes to tty..."

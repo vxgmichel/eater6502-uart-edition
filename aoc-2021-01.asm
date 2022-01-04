@@ -22,16 +22,16 @@ reset:
   ; Init accumulator in r0
   wrw #0 r0
 
+  ; Write '0' to LCD display
+  jsr lcd_clear
+  lda #"0"
+  jsr lcd_print_char
+
   ; Init previous value in r2
   wrw #string_buffer a0
   jsr uart_readline
   jsr from_base10
   wrw a0 r2
-
-  ; Write '0' to LCD display
-  jsr lcd_clear
-  lda #"0"
-  jsr lcd_print_char
 
   ; Loop over lines
   .line_loop:

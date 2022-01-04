@@ -7,7 +7,7 @@ s3: #res 1
 s4: #res 1
 s5: #res 1
 s6: #res 1
-s8: #res 1
+s7: #res 1
 arguments:
 a0: #res 1
 a1: #res 1
