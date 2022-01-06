@@ -44,6 +44,7 @@ stty -F /dev/ttyUSB0 \
                 char = sys.stdin.buffer.read(1)
                 if char in b'\x03\x04':
                     break
+                print(f"> {char!r}", end="\r\n", file=sys.stderr)
                 serial.write(char)
 
 

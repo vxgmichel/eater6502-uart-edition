@@ -23,7 +23,7 @@ reset:
   jsr uart_read_one
   cmp #0x7f
   beq .del_char
-  cmp #"\n"
+  cmp #"\r"
   beq .new_line
   .print_char:
   jsr lcd_print_char

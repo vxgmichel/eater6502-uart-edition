@@ -181,6 +181,9 @@ lcd_print_str:
 
 ; Delete a character from the LCD display
 lcd_del_char:
+  lda r0              ; Load r0
+  pha                 ; And push it onto the stack
+
   jsr lcd_wait        ; Wait for LCD to be ready
 
   lda #0b00000000     ; Set port B to input
@@ -190,14 +193,14 @@ lcd_del_char:
   lda #LCD_RIE        ; Enable LCD read instruction
   sta PORTA           ; Using the port A
   lda PORTB           ; Read port B to the accumulator
-  sta s0              ; Store value in s0
+  sta r0              ; Store value in r0
   lda #LCD_RI         ; Clear LCD enable
   sta PORTA           ; Using port A
   lda #0b11111111     ; Configure B back to output
   sta DDRB            ; Using the DDRB command
 
-  dec s0              ; Decrement s0
-  lda s0              ; Load to accumulator
+  dec r0              ; Decrement r0
+  lda r0              ; Load to accumulator
   ora #0b10000000     ; Prepare command
   cmp #0xff           ; Compare with -1
   beq .done           ; Already done
@@ -206,12 +209,17 @@ lcd_del_char:
   lda #" "            ; Load a space
   jsr lcd_print_char  ; Print space
 
-  lda s0              ; Load to accumulator
+  lda r0              ; Load to accumulator
   ora #0b10000000     ; Prepare command
   jsr lcd_instruction ; Move cursor
 
+  lda #0b11111111     ; Set port B back to output
+  sta DDRB            ; Using the DDRB command
+
   .done:
-  rts
+  pla                 ; Pull r0 from the stack
+  sta r0              ; And write it back
+  rts                 ; Return from subroutine
 
 
 ; Go to next line on the LCD
