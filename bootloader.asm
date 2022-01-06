@@ -112,6 +112,6 @@ irq:
 
 ; Libraries
 
-#include "lib/lcd.asm"
-#include "lib/uart.asm"
-#include "lib/rom.asm"
+#include "libraries/lcd.asm"
+#include "libraries/uart.asm"
+#include "libraries/rom.asm"

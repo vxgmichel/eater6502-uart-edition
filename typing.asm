@@ -47,5 +47,5 @@ irq:
 
 ; Libraries
 
-#include "lib/lcd.asm"
-#include "lib/uart.asm"
+#include "libraries/lcd.asm"
+#include "libraries/uart.asm"

@@ -51,6 +51,6 @@ irq:
 
 ; Libraries
 
-#include "lib/lcd.asm"
-#include "lib/rng.asm"
+#include "libraries/lcd.asm"
+#include "libraries/rng.asm"
 

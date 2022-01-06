@@ -44,5 +44,5 @@ irq:
 
 ; Libraries
 
-#include "lib/lcd.asm"
+#include "libraries/lcd.asm"
 

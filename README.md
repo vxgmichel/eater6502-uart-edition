@@ -196,7 +196,7 @@ Writing the EEPROM is not as simple as it seems. There's a reason why this chip 
 This wait time corresponds to the EEPROM actually writing itself and it can take up to 10ms. Since the EEPROM will not be available for reading during this period of time, this means that the code that performs this procedure cannot be stored in the EEPROM. Instead it has to be copied to the RAM and jumped to
 in order to make sure that the CPU will not try to read instructions from the EEPROM during its writing.
 
-This trick is implemented in the file [lib/rom.asm](./lib/rom.asm).
+This trick is implemented in the file [libraries/rom.asm](./libraries/rom.asm).
 
 
 ## Acknowledgments

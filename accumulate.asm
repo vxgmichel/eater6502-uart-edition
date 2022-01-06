@@ -71,6 +71,6 @@ irq:
 
 ; Libraries
 
-#include "lib/lcd.asm"
-#include "lib/uart.asm"
-#include "lib/decimal.asm"
+#include "libraries/lcd.asm"
+#include "libraries/uart.asm"
+#include "libraries/decimal.asm"

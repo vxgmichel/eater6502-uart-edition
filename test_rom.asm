@@ -50,9 +50,9 @@ irq:
 
 ; Libraries
 
-#include "lib/lcd.asm"
-#include "lib/rom.asm"
-#include "lib/decimal.asm"
+#include "libraries/lcd.asm"
+#include "libraries/rom.asm"
+#include "libraries/decimal.asm"
 
 ; Reserve data
 #align 256 * 8  ; Next page
