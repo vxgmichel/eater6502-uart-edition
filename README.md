@@ -1,6 +1,6 @@
 # Ben Eater 6502 computer - UART edition
 
-An updated design for Ben Eater 6502 computer that allows the flashing of new programs directly from a USB serial line.
+An updated design for [Ben Eater 6502 computer](https://eater.net/6502) that allows the flashing of new programs directly from a USB serial line.
 
 No EEPROM programmer required!*
 
@@ -8,7 +8,7 @@ No EEPROM programmer required!*
 
 ## Introduction
 
-The 6502 computer by Ben Eater is great, but constantly moving the EEPROM from the computer to the programer and back every time a new program needs to be flashed can quickly get annoying. This README file provides the instructions to add a USB-to-UART interface in order to communicate with another computer. The existing design is also changed a bit in order to allow the 6502 CPU to write to the EEPROM, essentially becoming its own programmer. This way, new programs can be read from the serial interface and written to the EEPROM, allowing developers to flash their programs through a simple write to a tty. In order to properly manage the writing of those subprograms, a bootloader first need to be written to the EEPROM. This repository provides this bootloader along with some subprograms including a random number generator and a solver for the first problem in the Advent of Code 2021.
+The [6502 computer](https://eater.net/6502) by [Ben Eater](https://eater.net) is great, but constantly moving the EEPROM from the computer to the programmer and back every time a new program needs to be flashed can quickly get annoying. This README file provides the instructions to add a USB-to-UART interface in order to communicate with another computer. The existing design is also changed a bit in order to allow the 6502 CPU to write to the EEPROM, essentially becoming its own programmer. This way, new programs can be read from the serial interface and written to the EEPROM, allowing developers to flash their programs through a simple write to a tty. In order to properly manage the writing of those subprograms, a bootloader first need to be written to the EEPROM. This repository provides this bootloader along with some subprograms including a random number generator and a solver for the [first problem](https://adventofcode.com/2021/day/1) in the [Advent of Code 2021](https://adventofcode.com/2021).
 
 Have fun :)
 
@@ -86,7 +86,14 @@ Note that the bootloader program expects the following wiring on the VIA ports:
 
 ## Memory map and layouts
 
-The original memory map is left mostly unchanged, except for the insertion of the UART element that mirrors its 8 registers 1024 times over the `0x4000-0x5fff` range (originally part of the RAM).
+The original memory map is left mostly unchanged, except for the insertion of the UART element that mirrors its 8 registers 1024 times over the `0x4000-0x5fff` range (originally part of the RAM):
+
+| a15 | a14 | a13 | Start address | Stop address | Size     | Type |
+|-----|-----|-----|---------------|--------------|----------|------|
+| 0   | 0   | X   | `0x0000`      | `0x3fff`     | `0x4000` | RAM  |
+| 0   | 1   | 0   | `0x4000`      | `0x5fff`     | `0x2000` | VIA  |
+| 0   | 1   | 1   | `0x6000`      | `0x7fff`     | `0x2000` | UART |
+| 1   | X   | X   | `0x8000`      | `0xffff`     | `0x8000` | ROM  |
 
 Several memory layouts for different usage are defined in the following files:
 - [layouts/eater.asm](./layouts/eater.asm): The original memory layout
@@ -179,7 +186,7 @@ Note that the RNG algorithm uses an [4261412736-cycle xorshift algorithm](https:
     ```bash
     customasm accumulate.asm && cat accumulate.bin | ./scripts/tty.sh 4096 && cat data/aoc-2021-01-sample.txt | ./scripts/tty.sh
     ```
-- [aoc-2021-01.asm](./aoc-2021-01.asm): Solve the first problem of the Advent of Code 2021
+- [aoc-2021-01.asm](./aoc-2021-01.asm): Solve the [first problem](https://adventofcode.com/2021/day/1) of the [Advent of Code 2021](https://adventofcode.com/2021/day/1)
     ```bash
     customasm aoc-2021-01.asm && cat aoc-2021-01.bin | ./scripts/tty.sh 4096 && cat data/aoc-2021-01-data.txt | ./scripts/tty.sh
     ```
@@ -201,4 +208,6 @@ This trick is implemented in the file [libraries/rom.asm](./libraries/rom.asm).
 
 ## Acknowledgments
 
-Many thanks to Florent for helping and putting up with the wiring of those 200 pins :)
+- [Ben Eater](https://eater.net) obviously, for the [amazing video series](https://www.youtube.com/c/BenEater) and [kits](https://eater.net/6502)
+- [Lorenzi](https://github.com/hlorenzi) for writing [customasm](https://github.com/hlorenzi/customasm) and [the full 6502 instruction set definition](https://github.com/hlorenzi/customasm/blob/main/examples/nes/cpu6502.asm)
+- Many thanks to Florent for helping and putting up with the wiring of those 200 pins :)
