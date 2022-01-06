@@ -1,4 +1,6 @@
-; Test script
+; A subprogram that solve the first problem of the Advent of Code 2021:
+; https://adventofcode.com/2021/day/1
+; The intermediate results are both written to the LCD and the serial line.
 
 #include "layouts/subeater.asm"
 

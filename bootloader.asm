@@ -1,13 +1,12 @@
-; A boot program for the eater 6502 architecture
+; A bootloader program for the eater 6502 architecture
 
-; The boot program copies itself in the ram,
-; Read a 4KB program from the serial line,
-; Write it permanently to the EPROM and
-; Run the subprogram
-
+; When started with button 1 pressed, the bootloader program:
+; - reads a 4KB subprogram from the serial line
+; - writes it permanently to the EPROM
+; - then run the subprogram
+; If button 1 is **not** pressed after a reset, the subprogram is run.
 
 #include "layouts/booteater.asm"
-
 
 
 ; Main program

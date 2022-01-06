@@ -1,4 +1,5 @@
-; Test script
+; A subprogram that accumulates the line-separated decimal numbers sent through the serial line.
+; The result is both written to the LCD and the serial line.
 
 #include "layouts/subeater.asm"
 

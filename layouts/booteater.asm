@@ -1,4 +1,4 @@
-; Banks for a boot program on the 6502 Ben Eater architecture
+; Banks for a bootloader program on the 6502 Ben Eater architecture
 
 #include "cpu6502.asm"
 #include "constants.asm"
