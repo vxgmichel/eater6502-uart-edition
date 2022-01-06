@@ -1,7 +1,7 @@
 ; A program that receives data from the UART and shows it on the LCD display
 ; It supports backspace and newline
 
-#include "map/subeater.asm"
+#include "layouts/subeater.asm"
 
 
 ; Main program

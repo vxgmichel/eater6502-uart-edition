@@ -76,7 +76,7 @@ PHI2 ───┤         │  ╰ UART /CS2
         ╰─────────╯
 ```
 
-Note that the boot program expects the following wiring on the VIA ports:
+Note that the bootloader program expects the following wiring on the VIA ports:
 - Port A pin 0: an LED
 - Port A pin 1: an active-low push button
 - Port A pin 5: LCD display RS
@@ -89,10 +89,10 @@ Note that the boot program expects the following wiring on the VIA ports:
 The original memory map is left mostly unchanged, except for the insertion of the UART element that mirrors its 8 registers 1024 times over the `0x4000-0x5fff` range (originally part of the RAM).
 
 Several memory layouts for different usage are defined in the following files:
-- [map/eater.asm](./map/eater.asm): The original memory layout
-- [map/rameater.asm](./map/eater.asm): A memory layout where the program is copied to the ram before being jumped to run
-- [map/subeater.asm](./map/eater.asm): The memory layout dedicated to the execution of subprograms
-- [map/booteater.asm](./map/eater.asm): The memory layout used by the bootloader program
+- [layouts/eater.asm](./layouts/eater.asm): The original memory layout
+- [layouts/rameater.asm](./layouts/eater.asm): A memory layout where the program is copied to the ram before being jumped to run
+- [layouts/subeater.asm](./layouts/eater.asm): The memory layout dedicated to the execution of subprograms
+- [layouts/booteater.asm](./layouts/eater.asm): The memory layout used by the bootloader program
 
 
 ## The bootloader program
@@ -103,19 +103,19 @@ The bootloader program is assemble using the latest version of [customasm](https
 $ curl https://sh.rustup.rs -sSf | sh
 # Install customasm
 $ cargo install customasm
-# Assemble the boot program
-$ customasm boot.asm
+# Assemble the bootloader program
+$ customasm bootloader.asm
 customasm v0.11.12 (x86_64-unknown-linux-gnu)
-assembling `boot.asm`...
-writing `boot.bin`...
+assembling `bootloader.asm`...
+writing `bootloader.bin`...
 success after 2 iterations
 ```
 
-Then write the `boot.bin` program to the EEPROM using a programmer and [minipro](https://gitlab.com/DavidGriffith/minipro/):
+Then write the `bootloader.bin` program to the EEPROM using a programmer and [minipro](https://gitlab.com/DavidGriffith/minipro/):
 ```bash
 # This either require sudo priviledges or udev configuration:
 # https://gitlab.com/DavidGriffith/minipro/#udev-configuration-recommended
-$ ./tools/minipro -p AT28C256 -w boot.bin
+$ ./tools/minipro -p AT28C256 -w bootloader.bin
 ```
 
 Put the EEPROM back into the computer, power it on, keep the button on `PA1` pressed and press reset. You should see the following message:

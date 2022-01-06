@@ -1,7 +1,7 @@
 ; Simple program printing "Hello, World!" to the LCD display,
 ; waiting for a while between each character
 
-#include "map/subeater.asm"
+#include "layouts/subeater.asm"
 
 
 #bank program

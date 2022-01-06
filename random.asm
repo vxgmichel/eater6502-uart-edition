@@ -1,7 +1,7 @@
 ; A program generating random 8-bit integer,
 ; and printing them on the LCD display
 
-#include "map/subeater.asm"
+#include "layouts/subeater.asm"
 
 
 ; Main program

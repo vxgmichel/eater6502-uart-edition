@@ -6,7 +6,7 @@
 ; Run the subprogram
 
 
-#include "map/booteater.asm"
+#include "layouts/booteater.asm"
 
 
 

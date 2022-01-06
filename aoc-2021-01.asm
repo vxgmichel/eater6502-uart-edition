@@ -1,6 +1,6 @@
 ; Test script
 
-#include "map/subeater.asm"
+#include "layouts/subeater.asm"
 
 
 ; Allocate a string buffer
