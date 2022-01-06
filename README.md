@@ -1,14 +1,17 @@
-# Ben Eater 6502 computer - UART edition
+# Eater 6502 computer - UART Edition
 
-An updated design for [Ben Eater 6502 computer](https://eater.net/6502) that allows the flashing of new programs directly from a USB serial line.
+An updated design for the [Eater 6502 computer](https://eater.net/6502) that allows the flashing of new programs directly from a USB serial line. No EEPROM programmer required!*
 
-No EEPROM programmer required!*
+<p align="center">
+<img src="./resources/eater6502-uart-edition.jpg" width="80%">
+</p>
 
 <sub>\*: Except once for the bootloader</sub>
 
+
 ## Introduction
 
-The [6502 computer](https://eater.net/6502) by [Ben Eater](https://eater.net) is great, but constantly moving the EEPROM from the computer to the programmer and back every time a new program needs to be flashed can quickly get annoying. This README file provides the instructions to add a USB-to-UART interface in order to communicate with another computer. The existing design is also changed a bit in order to allow the 6502 CPU to write to the EEPROM, essentially becoming its own programmer. This way, new programs can be read from the serial interface and written to the EEPROM, allowing developers to flash their programs through a simple write to a tty. In order to properly manage the writing of those subprograms, a bootloader first need to be written to the EEPROM. This repository provides this bootloader along with some subprograms including a random number generator and a solver for the [first problem](https://adventofcode.com/2021/day/1) in the [Advent of Code 2021](https://adventofcode.com/2021).
+The [6502 computer](https://eater.net/6502) by [Ben Eater](https://eater.net) is great, but constantly moving the EEPROM between the computer and the programmer every time a new program needs to be flashed can quickly get annoying. This README file provides the instructions to add a USB-to-UART interface in order to communicate with another computer. The existing design is also changed a bit in order to allow the 6502 CPU to write to the EEPROM, essentially becoming its own programmer. This way, new programs can be read from the serial interface and written to the EEPROM, allowing developers to flash their programs through a simple write to a tty. In order to properly manage the writing of those subprograms, a bootloader first need to be written to the EEPROM. This repository provides this bootloader along with some subprograms including a random number generator and a solver for the [first problem](https://adventofcode.com/2021/day/1) in the [Advent of Code 2021](https://adventofcode.com/2021).
 
 Have fun :)
 
@@ -90,10 +93,10 @@ The original memory map is left mostly unchanged, except for the insertion of th
 
 | a15 | a14 | a13 | Start address | Stop address | Size     | Type |
 |-----|-----|-----|---------------|--------------|----------|------|
-| 0   | 0   | X   | `0x0000`      | `0x3fff`     | `0x4000` | RAM  |
-| 0   | 1   | 0   | `0x4000`      | `0x5fff`     | `0x2000` | VIA  |
-| 0   | 1   | 1   | `0x6000`      | `0x7fff`     | `0x2000` | UART |
-| 1   | X   | X   | `0x8000`      | `0xffff`     | `0x8000` | ROM  |
+| `0` | `0` | `X` | `0x0000`      | `0x3fff`     | `0x4000` | RAM  |
+| `0` | `1` | `0` | `0x4000`      | `0x5fff`     | `0x2000` | VIA  |
+| `0` | `1` | `1` | `0x6000`      | `0x7fff`     | `0x2000` | UART |
+| `1` | `X` | `X` | `0x8000`      | `0xffff`     | `0x8000` | ROM  |
 
 Several memory layouts for different usage are defined in the following files:
 - [layouts/eater.asm](./layouts/eater.asm): The original memory layout
