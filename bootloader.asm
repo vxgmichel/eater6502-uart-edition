@@ -32,7 +32,7 @@ reset:
   jsr lcd_print_str        ; Print ready string
   lda #0b11000000          ; Move cursor to second line
   jsr lcd_instruction      ; Write instruction
-  jsr sleep                ; Wait at least 5 ms for the ROM write protection
+  jsr sleep                ; Wait at least 5 ms for the ROM write protection to fade out
 
   lda #serial_buffer[7:0]  ; Load serial buffer lower address
   sta a0                   ; to a0

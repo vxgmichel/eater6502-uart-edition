@@ -101,6 +101,13 @@ sleep:
 ; Wait for the LCD display to be ready, preserving the accumulator
 lcd_wait:
   pha             ; Push the accumulator onto the stack
+  jsr lcd_tell    ; Wait for the LCD display to be ready
+  pla             ; Restore the accumulator
+  rts             ; Return from subroutine
+
+
+; Wait for the LCD display to be ready, and return the cursor position
+lcd_tell:
   lda #0b00000000 ; Set port B to input
   sta DDRB        ; Using the DDRB command
 
@@ -110,6 +117,7 @@ lcd_wait:
   lda #LCD_RIE    ; Enable LCD read instruction
   sta PORTA       ; Using the port A
   lda PORTB       ; Read port B to the accumulator
+  sta s0          ; Store in s0
   and #0b10000000 ; Keep the MSB
   bne .lcdbusy    ; Loop if the value is not zero
 
@@ -117,7 +125,7 @@ lcd_wait:
   sta PORTA       ; Using port A
   lda #0b11111111 ; Configure B back to output
   sta DDRB        ; Using the DDRB command
-  pla             ; Pull the accumulator from the stack
+  lda s0          ; Load cursor position in the accumulator
   rts             ; Return from the subroutine
 
 
@@ -181,48 +189,24 @@ lcd_print_str:
 
 ; Delete a character from the LCD display
 lcd_del_char:
-  lda r0              ; Load r0
-  pha                 ; And push it onto the stack
+  jsr lcd_wait        ; Get cursor position (once the display is ready)
 
-  jsr lcd_wait        ; Wait for LCD to be ready
-
-  lda #0b00000000     ; Set port B to input
-  sta DDRB            ; Using the DDRB command
-  lda #LCD_RI         ; Configure LCD read instruction
-  sta PORTA           ; Using the port A
-  lda #LCD_RIE        ; Enable LCD read instruction
-  sta PORTA           ; Using the port A
-  lda PORTB           ; Read port B to the accumulator
-  sta r0              ; Store value in r0
-  lda #LCD_RI         ; Clear LCD enable
-  sta PORTA           ; Using port A
-  lda #0b11111111     ; Configure B back to output
-  sta DDRB            ; Using the DDRB command
-
-  dec r0              ; Decrement r0
-  lda r0              ; Load to accumulator
-  ora #0b10000000     ; Prepare command
-  cmp #0xff           ; Compare with -1
-  beq .done           ; Already done
-  jsr lcd_instruction ; Move curor
+  lda #0b00010000     ; Prepare command
+  jsr lcd_instruction ; Move curor to the left
 
   lda #" "            ; Load a space
   jsr lcd_print_char  ; Print space
 
-  lda r0              ; Load to accumulator
-  ora #0b10000000     ; Prepare command
-  jsr lcd_instruction ; Move cursor
+  lda #0b00010000     ; Prepare command
+  jsr lcd_instruction ; Move cursor to the left
 
-  lda #0b11111111     ; Set port B back to output
-  sta DDRB            ; Using the DDRB command
-
-  .done:
-  pla                 ; Pull r0 from the stack
-  sta r0              ; And write it back
   rts                 ; Return from subroutine
 
 
 ; Go to next line on the LCD
 lcd_new_line:
-  ; TODO
+  jsr lcd_tell
+  and #0b01000000
+  eor #0b11000000
+  jsr lcd_instruction      ; Write instruction
   rts
