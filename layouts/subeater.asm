@@ -22,3 +22,6 @@
 #d16   le(nmi`16) ; Non-maskable interrupt entry point
 #d16 le(reset`16) ; Reset entry point
 #d16   le(irq`16) ; Maskable interrupt entry point
+
+#bank romprg
+romprogram:

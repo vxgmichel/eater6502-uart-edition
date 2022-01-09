@@ -25,24 +25,14 @@ reset:
   and #0b00000010          ; Get first button
   bne .done                ; Jump to subprogram if not pressed
 
-  lda #ready_str[7:0]      ; Load ready string lower address
-  sta a0                   ; to a0
-  lda #ready_str[15:8]     ; Load ready string higher address
-  sta a1                   ; to a1
+  wrw #ready_str a0        ; Load ready string address to a0-a1
   jsr lcd_print_str        ; Print ready string
   lda #0b11000000          ; Move cursor to second line
   jsr lcd_instruction      ; Write instruction
   jsr sleep                ; Wait at least 5 ms for the ROM write protection to fade out
 
-  lda #serial_buffer[7:0]  ; Load serial buffer lower address
-  sta a0                   ; to a0
-  lda #serial_buffer[15:8] ; Load serial buffer higher address
-  sta a1                   ; to a1
-
-  lda #subprogram[7:0]     ; Load subprogram lower address
-  sta a2                   ; to a2
-  lda #subprogram[15:8]    ; Load subprogram higher address
-  sta a3                   ; to a3
+  wrw #serial_buffer a0    ; Load serial buffer address to a0-a1
+  wrw #subprogram a2       ; Load subprogram address to a2-a3
 
   ldx #0x10                ; Loop over 16 pages
   .page_write:             ; ...
@@ -58,8 +48,12 @@ reset:
   bcc .chunk_write         ; Loop while not overflow
   clc                      ; Clear carry
 
-  lda #"."                 ; Load a dot
-  jsr lcd_print_char       ; Print a dot
+  jsr lcd_del_char
+  lda #"="
+  jsr lcd_print_char
+  lda #">"                 ; Load a star
+  jsr lcd_print_char       ; Print a star
+
   txa                      ; Transfer X to A
   and #0b00000000001       ; Keep lowest bit
   eor #0b00000000001       ; Invert it
@@ -71,10 +65,7 @@ reset:
 
   jsr lcd_clear            ; Clear LCD display
 
-  lda #complete_str[7:0]   ; Load complete string lower address
-  sta a0                   ; to a0
-  lda #complete_str[15:8]  ; Load complete string higher address
-  sta a1                   ; to a1
+  wrw #complete_str a0     ; Load complete string address to a0-a1
   jsr lcd_print_str        ; Print complete_str to LCD display
 
   jsr sleep                ; Sleep for 1 second
