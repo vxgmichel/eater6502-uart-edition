@@ -22,7 +22,7 @@ _rom_write_start:
   dex                      ; Decrement X
   bne .byte_loop           ; Loop over bytes
 
-  ldx #0x00                ; Decrement Y back to the last written value
+  dey                      ; Decrement Y back to the last written value
   .wait_loop:              ; Loop until write is over
   lda (a2), y              ; Read ROM
   eor (a2), y              ; XOR with the last read

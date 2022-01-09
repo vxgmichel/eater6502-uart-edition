@@ -12,8 +12,7 @@
 #bankdef iomux    { #addr 0x6000, #size 0x2000 }
 #bankdef program  { #addr 0x8000, #size 0x0ffa, #outp 8 * 0x0000 }
 #bankdef subvecs  { #addr 0x8ffa, #size 0x0006, #outp 8 * 0x0ffa }
-#bankdef romprg   { #addr 0xf000, #size 0x0f00 }
-#bankdef bootprg  { #addr 0xff00, #size 0x00fa }
+#bankdef bootprg  { #addr 0xf000, #size 0x0ffa }
 #bankdef vectors  { #addr 0xfffa, #size 0x0006 }
 
 #include "zeropage.asm"
@@ -23,5 +22,5 @@
 #d16 le(reset`16) ; Reset entry point
 #d16   le(irq`16) ; Maskable interrupt entry point
 
-#bank romprg
-romprogram:
+#bank bootprg
+bootprogram:

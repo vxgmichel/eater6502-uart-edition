@@ -1,8 +1,8 @@
 ; Banks for the 6502 Ben Eater architecture
 
-; Also defines a boot routine that copies the program to the RAM
+; Also defines a copy routine that copies the program to the RAM
 ; before executing it. This allows the program to reprogram the
-; EPROM if necessary.
+; whole EPROM if necessary.
 
 #include "cpu6502.asm"
 #include "constants.asm"
@@ -18,7 +18,7 @@
 #bankdef subprog  { #addr 0x8000, #size 0x0ffa, #outp 8 * 0x0000 }
 #bankdef subvecs  { #addr 0x8ffa, #size 0x0006, #outp 8 * 0x0ffa }
 #bankdef romprg   { #addr 0xf000, #size 0x0f00 }
-#bankdef bootprg  { #addr 0xff00, #size 0x00fa, #outp 8 * 0x7f00 }
+#bankdef copyprg  { #addr 0xff00, #size 0x00fa, #outp 8 * 0x7f00 }
 #bankdef vectors  { #addr 0xfffa, #size 0x0006, #outp 8 * 0x7ffa }
 
 #include "zeropage.asm"
@@ -43,17 +43,11 @@ subprgm_irq_vec:   #d16   le(subprogram_irq`16) ; Maskable interrupt entry point
 #bank romprg
 rom_program:
 
-#bank bootprg
+#bank copyprg
 rom_reset:
 
-  lda #rom_program[7:0]   ; Load rom program lower address
-  sta 0                   ; At address 0
-  lda #rom_program[15:8]  ; Load rom program higher address
-  sta 1                   ; At address 1
-  lda #program[7:0]       ; Load ram program lower address
-  sta 2                   ; At address 2
-  lda #program[15:8]      ; Load ram program hight address
-  sta 3                   ; At address 4
+  wrw #rom_program 0      ; Write rom program address at address 0-1
+  wrw #program 2          ; Write ram program address at address 2-3
 
   ldx #0x10               ; Loop over 16 pages
   .page_copy:             ; ...
