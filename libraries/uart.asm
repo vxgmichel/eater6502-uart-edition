@@ -61,7 +61,8 @@ FCR_RFTL14 = 0b11000000 ; Set receiver FIFO trigger level is 14
 
 
 ; Default FIFO Control Register configuration
-FCR_CONFIG = FCR_FIFDIS | FCR_FIFRST
+
+FCR_CONFIG = FCR_FIFENB | FCR_FIFRST | FCR_RFTL01
 
 
 ; Masks for Line Status Register
@@ -69,9 +70,10 @@ FCR_CONFIG = FCR_FIFDIS | FCR_FIFRST
 LSR_DATRDY = 0b00000001 ; Data ready
 
 
-; Allocate 64 bytes on the RAM for a global buffer
+; Allocate 256 bytes on the RAM for a global buffer
 
 #bank ram
+#align 256
 serial_buffer: #res 256
 
 
@@ -81,7 +83,7 @@ serial_buffer: #res 256
 
 ; Configure the UART receiver
 ; Line control configuration:
-; - Baud rate: 4807 Hz (1MHz / 16 / 13)
+; - Baud rate: 115200 (1.8432MHz / 16 / 1)
 ; - 8-bit characters
 ; - 2 stop bits
 ; - Enable even parity
@@ -95,7 +97,7 @@ uart_init:
   lda #LCR_DIVLTC  ; Set the divisor latch
   sta UART_LCR     ; Write to LCR
 
-  lda #0x0d       ; Set the divisor lower byte (13)
+  lda #0x01       ; Set the divisor lower byte (1)
   sta UART_DLL    ; Write to DLL
   lda #0x00       ; Set the divisor higher byte (0)
   sta UART_DLM    ; Write to DLM
@@ -119,7 +121,7 @@ uart_wait_read:
   and #LSR_DATRDY       ; Keep data ready bit
   bne .done             ; Done if data ready
 
-  lda #MCR_RTSSET       ; Set RTS in case it's not already set
+  lda #MCR_AUTRTS       ; Set autoflow control
   sta UART_MCR          ; Write to MCR
 
   .wait_ready:          ; Wait data to be available
@@ -127,7 +129,7 @@ uart_wait_read:
   and #LSR_DATRDY       ; Keep data ready bit
   beq .wait_ready       ; Wait for data ready
 
-  lda #MCR_RTSCLR       ; Clear RTS
+  lda #MCR_RTSCLR       ; Clear RTS and autoflow control
   sta UART_MCR          ; Write to MCR
 
   .done:                ; Done

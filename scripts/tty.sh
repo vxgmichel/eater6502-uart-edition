@@ -6,7 +6,7 @@
 
 >&2 echo "> configuring tty..."
 stty -F /dev/ttyUSB0 \
-  speed 4800 \
+  speed 115200 \
   cs8 cstopb parenb -parodd -cmspar \
   -hupcl clocal cread crtscts \
   -ocrnl -ofdel -ofill -olcuc -onlcr -onlret -onocr -opost \
