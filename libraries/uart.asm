@@ -90,7 +90,7 @@ serial_buffer: #res 256
 ; - No stick bit
 ; - No break
 ; FIFO configuration:
-; - Disable FIFO
+; - Enable FIFO with trigger level at 1
 uart_init:
   pha             ; Push A onto the stack
 

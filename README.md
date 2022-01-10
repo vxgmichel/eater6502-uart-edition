@@ -19,9 +19,10 @@ Have fun :)
 
 Only three new components are required:
 
-- The **FT232** USB UART board
-- The [TL16C550CN](https://www.ti.com/product/TL16C550C) UART element
-- The **74HCT04N** hex inverter (6 NOT-gates)
+- An **FT232** USB UART board
+- A [TL16C550CN](https://www.ti.com/product/TL16C550C) UART element
+- A **74HCT04N** hex inverter (6 NOT-gates)
+- A **1.8432MHz** crystal oscillator
 
 ## New wiring
 
@@ -79,6 +80,8 @@ PHI2 ───┤         │  ╰ UART /CS2
         ╰─────────╯
 ```
 
+Finally, replace the original 1 MHz crystal oscillator with the 1.8432 MHz.
+
 Note that the bootloader program expects the following wiring on the VIA ports:
 - Port A pin 0: an LED
 - Port A pin 1: an active-low push button
@@ -107,7 +110,7 @@ Several memory layouts for different usage are defined in the following files:
 
 ## The bootloader program
 
-The bootloader program is assemble using the latest version of [customasm](https://github.com/hlorenzi/customasm):
+The bootloader program is assembled using the latest version of [customasm](https://github.com/hlorenzi/customasm):
 ```bash
 # Install rust and cargo
 $ curl https://sh.rustup.rs -sSf | sh
@@ -161,6 +164,12 @@ $ cat random.bin | scripts/tty.sh 4096
 > tty written!
 ```
 
+In particular, the following configuration is applied:
+- 115200 baud
+- 8-bit characters, an even parity bit and 2 stop bits
+- no output post processing
+- no echo or input conversion
+
 If the 6502 computer is in `Ready for input` mode, the light should start blinking while the subprogram is being written to the EEPROM. After a while, the message `Transfer complete!` should appear and the subprogram automatically starts after a second. In this case it should start displaying randomly generated numbers every second:
 ```
 Random: 8c
@@ -192,6 +201,11 @@ Note that the RNG algorithm uses an [4261412736-cycle xorshift algorithm](https:
 - [aoc-2021-01.asm](./aoc-2021-01.asm): Solve the [first problem](https://adventofcode.com/2021/day/1) of the [Advent of Code 2021](https://adventofcode.com/2021/day/1)
     ```bash
     customasm aoc-2021-01.asm && cat aoc-2021-01.bin | ./scripts/tty.sh 4096 && cat data/aoc-2021-01-data.txt | ./scripts/tty.sh
+    ```
+- [bootupdater.asm](./bootupdater.asm): Update the bootloader by reading 4KB from the serial line and writing to address 0x7000
+    ```bash
+    customasm bootupdater.asm && cat bootupdater.bin | ./scripts/tty.sh 4096
+    customasm bootloader.asm && cat bootloader.bin | tail -c 4096 | ./scripts/tty.sh 4096
     ```
 
 ## The greasy details

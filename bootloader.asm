@@ -48,11 +48,8 @@ reset:
   bcc .chunk_write         ; Loop while not overflow
   clc                      ; Clear carry
 
-  jsr lcd_del_char
-  lda #"="
-  jsr lcd_print_char
-  lda #">"                 ; Load a star
-  jsr lcd_print_char       ; Print a star
+  lda #"."                 ; Load a dot
+  jsr lcd_print_char       ; Print it
 
   txa                      ; Transfer X to A
   and #0b00000000001       ; Keep lowest bit
