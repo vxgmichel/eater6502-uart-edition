@@ -1,7 +1,13 @@
 ; A subprogram to update the bootloader.
 
 
-#include "layouts/subeater.asm"
+#include "layouts/ramsubeater.asm"
+
+; Reserve a string buffer in the ram
+
+#bank ram
+#align 32
+string_buffer: #res 32
 
 
 ; Main program
@@ -22,32 +28,47 @@ reset:
   jsr lcd_instruction      ; Write instruction
   jsr sleep                ; Wait at least 5 ms for the ROM write protection to fade out
 
-  wrw #serial_buffer a0    ; Load serial buffer address to a0-a1
-  wrw #bootprogram a2      ; Load romprogram address to a2-a3
-
-  ldx #0x10                ; Loop over 16 pages
+  wrw #0x8000 r0           ; Load address 0x8000 to r0-r1
+  ldx #0x80                ; Loop over 128 pages
   .page_write:             ; ...
 
   .chunk_write:            ; Loop over 4 chunks of 64 bytes
   lda #0x40                ; Load 64 as argument
   jsr uart_read            ; Read 64 bytes from serial
+  wrw #serial_buffer a0    ; Load serial buffer address to a0-a1
+  wrw r0 a2                ; Write current address to a2
   jsr rom_write            ; Write a0 to a2
-  lda a2                   ; Increment subprogram lower address
+  lda r0                   ; Increment lower address
   clc                      ; Clear carry
   adc #0x40                ; By 64
-  sta a2                   ; And write back
+  sta r0                   ; And write back
   bcc .chunk_write         ; Loop while not overflow
   clc                      ; Clear carry
 
-  lda #"."                 ; Load a dot
-  jsr lcd_print_char       ; Print it
+  lda r1                   ; Load higher address
+  and #0b01111111          ; Clear MSB
+  lsr a                    ; Divide by 2
+  lsr a                    ; Divide by 2
+  sta a0                   ; Store in a0
+  wrb #0 a1                ; Load 0 to a1
+  wrw #string_buffer a2    ; Load string buffer
+  jsr to_base10            ; Convert to base 10
 
+  wrw #string_buffer a0    ; Load string buffer as argument
+  jsr lcd_clear_row        ; Clear row
+  jsr lcd_print_str        ; Print it
+  wrw #total_str a0        ; Load total string address
+  jsr lcd_print_str        ; Print it
+
+  dex                      ; Decrement X
   txa                      ; Transfer X to A
-  and #0b00000000001       ; Keep lowest bit
-  eor #0b00000000001       ; Invert it
+  inx                      ; Reincrement X
+  and #0b00000000100       ; Keep third lowest bit
+  lsr a                    ; Shift it left
+  lsr a                    ; Shift it left
   sta PORTA                ; Toggle the LED
 
-  inc a3                   ; Increment subprogram higher address
+  inc r1                   ; Increment higher address
   clc                      ; Clear carry
   dex                      ; Decrement X
   bne .page_write          ; Loop until X equals zero
@@ -60,9 +81,11 @@ reset:
   jsr sleep                ; Sleep for 1 second
   jsr sleep                ; ...
   jsr sleep                ; ...
+  jsr sleep                ; ...
+  jsr sleep                ; ...
 
   .done:
-  jmp .done
+  jmp (boot_reset)         ; Jump to bootloader reset
 
 
 ; Static data
@@ -74,6 +97,10 @@ ready_str:
 complete_str:
 #d "Transfer        xxxxxxxxxxxxxxxxxxxxxxxx"
 #d "      Complete !"
+#d "\0"
+
+total_str:
+#d " / 32 KB"
 #d "\0"
 
 empty_str:
@@ -92,3 +119,4 @@ irq:
 #include "libraries/lcd.asm"
 #include "libraries/uart.asm"
 #include "libraries/rom.asm"
+#include "libraries/decimal.asm"

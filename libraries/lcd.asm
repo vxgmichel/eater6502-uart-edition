@@ -205,8 +205,34 @@ lcd_del_char:
 
 ; Go to next line on the LCD
 lcd_new_line:
-  jsr lcd_tell
-  and #0b01000000
-  eor #0b11000000
+  jsr lcd_tell             ; Get cursor
+  and #0b01000000          ; Get begining of the row
+  eor #0b11000000          ; Toggle row and move instruction
   jsr lcd_instruction      ; Write instruction
   rts
+
+
+lcd_clear_row:
+  txa                      ; Transfer X
+  pha                      ; And push it onto the stack
+
+  jsr lcd_tell             ; Get cursor
+  and #0b01000000          ; Get begining of the row
+  eor #0b10000000          ; Move cursor instruction
+  jsr lcd_instruction      ; Write instruction
+
+  ldx #0x10                ; Loop over 16 characters
+  lda #" "                 ; Load space
+  .byte_loop:              ; Loop over characters
+  jsr lcd_print_char       ; Print space
+  dex                      ; Decrement x
+  bne .byte_loop           ; Loop over
+
+  jsr lcd_tell             ; Get cursor
+  and #0b01000000          ; Get begining of the row
+  eor #0b10000000          ; Move cursor instruction
+  jsr lcd_instruction      ; Write instruction
+
+  pla                      ; Pull x from stack
+  tax                      ; And transfer it back
+  rts                      ; Return

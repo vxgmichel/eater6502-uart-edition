@@ -202,10 +202,10 @@ Note that the RNG algorithm uses an [4261412736-cycle xorshift algorithm](https:
     ```bash
     customasm aoc-2021-01.asm && cat aoc-2021-01.bin | ./scripts/tty.sh 4096 && cat data/aoc-2021-01-data.txt | ./scripts/tty.sh
     ```
-- [bootupdater.asm](./bootupdater.asm): Update the bootloader by reading 4KB from the serial line and writing to address 0x7000
+- [bootupdater.asm](./bootupdater.asm): Update the bootloader by reading 32KB from the serial line and writing the EEPROM
     ```bash
     customasm bootupdater.asm && cat bootupdater.bin | ./scripts/tty.sh 4096
-    customasm bootloader.asm && cat bootloader.bin | tail -c 4096 | ./scripts/tty.sh 4096
+    customasm bootloader.asm && cat bootloader.bin | ./scripts/tty.sh 32768
     ```
 
 ## The greasy details

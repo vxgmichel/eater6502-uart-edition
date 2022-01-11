@@ -63,3 +63,8 @@ rom_irq:
 #d16   le(rom_nmi`16) ; Non-maskable interrupt entry point
 #d16 le(rom_reset`16) ; Reset entry point
 #d16   le(rom_irq`16) ; Maskable interrupt entry point
+
+#bank vectors
+boot_nmi: #res 2
+boot_reset: #res 2
+boot_irq: #res 2

@@ -51,9 +51,12 @@ reset:
   lda #"."                 ; Load a dot
   jsr lcd_print_char       ; Print it
 
+  dex                      ; Decrement X
   txa                      ; Transfer X to A
-  and #0b00000000001       ; Keep lowest bit
-  eor #0b00000000001       ; Invert it
+  inx                      ; Reincrement X
+  and #0b00000000100       ; Keep third lowest bit
+  lsr a                    ; Shift it left
+  lsr a                    ; Shift it left
   sta PORTA                ; Toggle the LED
 
   inc a3                   ; Increment subprogram higher address
@@ -66,6 +69,8 @@ reset:
   jsr lcd_print_str        ; Print complete_str to LCD display
 
   jsr sleep                ; Sleep for 1 second
+  jsr sleep                ; ...
+  jsr sleep                ; ...
   jsr sleep                ; ...
   jsr sleep                ; ...
 
