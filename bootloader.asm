@@ -77,7 +77,7 @@ reset:
   jsr lcd_clear            ; Clear LCD display
 
   .done:
-  jmp (subprgm_reset_vec)  ; Jump to subprogram reset
+  jmp (subprogram_reset_vec)  ; Jump to subprogram reset
 
 
 ; Static data
@@ -98,8 +98,10 @@ empty_str:
 ; Interrupt handling
 
 nmi:
+  jmp (subprogram_nmi_vec)
+
 irq:
-  rti
+  jmp (subprogram_irq_vec)
 
 
 ; Libraries

@@ -26,9 +26,9 @@ subprogram_irq:      ; IRQ handler
 rti                  ; Return from interrupt
 
 #bank subvecs
-subprgm_nmi_vec:   #d16   le(subprogram_nmi`16) ; Non-maskable interrupt entry point
-subprgm_reset_vec: #d16 le(subprogram_reset`16) ; Reset entry point
-subprgm_irq_vec:   #d16   le(subprogram_irq`16) ; Maskable interrupt entry point
+subprogram_nmi_vec:   #d16   le(subprogram_nmi`16) ; Non-maskable interrupt entry point
+subprogram_reset_vec: #d16 le(subprogram_reset`16) ; Reset entry point
+subprogram_irq_vec:   #d16   le(subprogram_irq`16) ; Maskable interrupt entry point
 
 #bank program
 bootprogram:

@@ -1,5 +1,6 @@
 ; Library for writing to the ROM
 
+
 ; Add _rom_write body to the program
 #bank program
 
@@ -48,6 +49,9 @@ rom_write:
   tya                     ; Transfer Y to A
   pha                     ; And push it onto the stack
 
+  php                     ; Push processor status on the stack
+  sei                     ; Do not allow interrupt
+
   ldx #_rom_write_length  ; Load X with the copy length
   ldy #0x00               ; Load Y with 0
 
@@ -58,10 +62,11 @@ rom_write:
   dex                     ; Decrement X
   bne .byte_loop          ; Loop until last byte
 
-  jsr rom_write_body    ; Jump to rom write body
+  jsr rom_write_body      ; Jump to rom write body
 
-  pla                   ; Pull Y from the stack
-  tay                   ; And transfer it
-  pla                   ; Pull Y from the stack
-  tax                   ; And transfer it
-  rts                   ; Return
+  plp                     ; Restore processor status
+  pla                     ; Pull Y from the stack
+  tay                     ; And transfer it
+  pla                     ; Pull Y from the stack
+  tax                     ; And transfer it
+  rts                     ; Return
