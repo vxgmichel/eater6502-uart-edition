@@ -13,9 +13,10 @@
 
 #bank program
 reset:
+  sei                      ; Disallow interrupt by default
 
-  ldx #0xff                ; Initialize the stack pointer at the end of its dedicated page
-  txs                      ; ...
+  ldx #0xff                ; Initialize the stack pointer
+  txs                      ; at the end of its dedicated page
 
   jsr uart_init            ; Configure UART receiver
   jsr lcd_init             ; Initialize the LCD display
@@ -29,7 +30,9 @@ reset:
   jsr lcd_print_str        ; Print ready string
   lda #0b11000000          ; Move cursor to second line
   jsr lcd_instruction      ; Write instruction
-  jsr sleep                ; Wait at least 5 ms for the ROM write protection to fade out
+
+  lda #2                   ; Wait 20 ms
+  jsr time_busy_sleep      ; for the ROM write protection to fade out
 
   wrw #serial_buffer a0    ; Load serial buffer address to a0-a1
   wrw #subprogram a2       ; Load subprogram address to a2-a3
@@ -68,11 +71,8 @@ reset:
   wrw #complete_str a0     ; Load complete string address to a0-a1
   jsr lcd_print_str        ; Print complete_str to LCD display
 
-  jsr sleep                ; Sleep for 1 second
-  jsr sleep                ; ...
-  jsr sleep                ; ...
-  jsr sleep                ; ...
-  jsr sleep                ; ...
+  lda #50                  ; Load 50 * 10 ms
+  jsr time_busy_sleep      ; Sleep for 0.5 seconds
 
   jsr lcd_clear            ; Clear LCD display
 
@@ -107,5 +107,6 @@ irq:
 ; Libraries
 
 #include "libraries/lcd.asm"
+#include "libraries/time.asm"
 #include "libraries/uart.asm"
 #include "libraries/rom.asm"

@@ -11,8 +11,10 @@ reset:
 
   ldx #0xff          ; Initialize the stack pointer at the end of its dedicated page
   txs
+
   jsr rng_init       ; Initialize the RNG
   jsr lcd_init       ; Initialize the LCD display
+  jsr time_init      ; Initialize the time module
 
   .main:
   jsr lcd_clear      ; Clear the LCD display
@@ -29,9 +31,8 @@ reset:
   jsr rng_step       ; Step the RNG
   lda rng_a          ; Get the current random value
   jsr lcd_print_num  ; Print it
-  jsr sleep          ; Sleep about 1 second
-  jsr sleep          ; ...
-  jsr sleep          ; ...
+  lda #100           ; Load 100 * 10 ms
+  jsr time_sleep     ; Sleep for 1 second
   jmp .main          ; Loop over
 
 
@@ -45,7 +46,10 @@ message:
 ; Interrupt handling
 
 nmi:
+  rti
+
 irq:
+  jsr time_irq
   rti
 
 
@@ -53,4 +57,5 @@ irq:
 
 #include "libraries/lcd.asm"
 #include "libraries/rng.asm"
+#include "libraries/time.asm"
 

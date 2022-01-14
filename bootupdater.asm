@@ -26,7 +26,9 @@ reset:
   jsr lcd_print_str        ; Print ready string
   lda #0b11000000          ; Move cursor to second line
   jsr lcd_instruction      ; Write instruction
-  jsr sleep                ; Wait at least 5 ms for the ROM write protection to fade out
+
+  lda #2                   ; Wait 20 ms
+  jsr time_busy_sleep      ; for the ROM write protection to fade out
 
   wrw #0x8000 r0           ; Load address 0x8000 to r0-r1
   ldx #0x80                ; Loop over 128 pages
@@ -78,11 +80,8 @@ reset:
   wrw #complete_str a0     ; Load complete string address to a0-a1
   jsr lcd_print_str        ; Print complete_str to LCD display
 
-  jsr sleep                ; Sleep for 1 second
-  jsr sleep                ; ...
-  jsr sleep                ; ...
-  jsr sleep                ; ...
-  jsr sleep                ; ...
+  lda #50                  ; Load 50 * 10 ms
+  jsr time_busy_sleep      ; Sleep for 0.5 seconds
 
   .done:
   jmp (boot_reset)         ; Jump to bootloader reset
@@ -110,13 +109,15 @@ empty_str:
 ; Interrupt handling
 
 nmi:
-irq:
   rti
 
+irq:
+  rti
 
 ; Libraries
 
 #include "libraries/lcd.asm"
-#include "libraries/uart.asm"
 #include "libraries/rom.asm"
+#include "libraries/time.asm"
+#include "libraries/uart.asm"
 #include "libraries/decimal.asm"

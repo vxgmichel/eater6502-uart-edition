@@ -74,29 +74,6 @@ lcd_print_num:
 hexa_symbols:
 #d "0123456789abcdef"
 
-; Sleep for a while
-
-sleep:
-  txa             ; Transfer X to A
-  pha             ; And push it onto the stack
-  tya             ; Transfer Y to A
-  pha             ; And push it onto the stack
-
-  ldy #0xff       ; Initialize Y to 255
-  .loop1:         ; Outer loop
-  ldx #0xff       ; Initialize X to 255
-  .loop2:         ; Inner loop
-  dex             ; Decrement X
-  bne .loop2      ; Jump to inner loop while X is not zero
-  dey             ; Decrement Y
-  bne .loop1      ; Jump to outer loop while Y is not zero
-
-  pla             ; Pull Y from the stack
-  tay             ; And transfer it
-  pla             ; Pull X from the stack
-  tax             ; And transfer it
-  rts             ; Return
-
 
 ; Wait for the LCD display to be ready, preserving the accumulator
 lcd_wait:

@@ -16,7 +16,11 @@ reset:
 
   jsr lcd_init          ; Init LCD
   jsr lcd_clear         ; Clear lCD
-  jsr sleep             ; Wait for ROM safety to fade away
+  jsr time_init         ; Init time module
+
+  lda #2                ; Wait 20 ms
+  jsr time_sleep        ; for the ROM write protection to fade out
+
   wrw #0x0000 r0        ; Load 0 in word r0
 
   .main:                ; Main program
@@ -45,13 +49,17 @@ reset:
 ; Interrupt
 
 nmi:
+  rti
+
 irq:
+  jsr time_irq
   rti
 
 ; Libraries
 
 #include "libraries/lcd.asm"
 #include "libraries/rom.asm"
+#include "libraries/time.asm"
 #include "libraries/decimal.asm"
 
 ; Reserve data

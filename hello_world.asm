@@ -13,6 +13,7 @@ reset:
   txs
 
   jsr lcd_init        ; Initialize LCD display
+  jsr time_init       ; Initialize time module
 
   .main:
   jsr lcd_clear       ; Clear display
@@ -22,27 +23,31 @@ reset:
   lda message,x       ; Get a character from message, indexed by X
   beq .done           ; Start over when the zero char is reached
   jsr lcd_print_char  ; Print the character
-  jsr sleep           ; Sleep for a while
+  lda #20             ; Load 20 * 10 ms
+  jsr time_sleep      ; Sleep for 0.2 seconds
   inx                 ; Increment the X register
   jmp .print          ; Loop over
 
   .done:
-  jsr sleep           ; Sleep for about 1 second
-  jsr sleep
-  jsr sleep
+  lda #100            ; Load 100 * 10 ms
+  jsr time_sleep      ; Sleep for 1 second
   jmp .main           ; Loop over
 
 message:
-#d "Hello, World!"  ; This is the string to display
-#d "\0"                 ; Null terminated
+#d "Hello, World!"    ; This is the string to display
+#d "\0"               ; Null terminated
 
 ; Interrupt handling
 
 nmi:
+  rti
+
 irq:
+  jsr time_irq
   rti
 
 ; Libraries
 
 #include "libraries/lcd.asm"
+#include "libraries/time.asm"
 
