@@ -21,28 +21,29 @@ time_events: #res 1
 
 ; Time interrupt
 time_irq:
-  pha               ; Push A onto the stack
+  pha                ; Push A onto the stack
 
-  lda VIA_IFR       ; Load Interrupt Flag Register
-  and #0b01000000   ; Keep timer 1 flag
-  beq .done         ; Not a timer 1 interrupt, we're done
+  lda VIA_IFR        ; Load Interrupt Flag Register
+  and #0b01000000    ; Keep timer 1 flag
+  beq .done          ; Not a timer 1 interrupt, we're done
 
-  lda time_events   ; Load time events
-  ora #EVENT_TICK   ; Set the tick event
-  sta time_events   ; Save time events
+  lda time_events    ; Load time events
+  ora #EVENT_TICK    ; Set the tick event
+  sta time_events    ; Save time events
 
-  lda VIA_T1C_L     ; Reading T1C_L clears bit 6 in IFR
-  inc time_ticks    ; Increment ticks counter
-  cmp TICKS_PER_SEC ; Compare with TICKS_PER_SEC
-  bne .done         ; Counter is still positive, we're done
+  lda VIA_T1C_L      ; Reading T1C_L clears bit 6 in IFR
+  inc time_ticks     ; Increment ticks counter
+  lda time_ticks     ; Load ticks counter
+  cmp #TICKS_PER_SEC ; Compare with TICKS_PER_SEC
+  bne .done          ; Counter is still positive, we're done
 
-  lda #0            ; Load zero
-  sta time_ticks    ; Reset ticks counter
-  inw time_seconds  ; Increment seconds counter
+  lda #0             ; Load zero
+  sta time_ticks     ; Reset ticks counter
+  inw time_seconds   ; Increment seconds counter
 
-  lda time_events   ; Load time events
-  ora #EVENT_SECOND ; Set the second event
-  sta time_events   ; Store time events
+  lda time_events    ; Load time events
+  ora #EVENT_SECOND  ; Set the second event
+  sta time_events    ; Store time events
 
   .done:
   pla             ; Restore A register
