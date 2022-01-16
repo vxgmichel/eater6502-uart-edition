@@ -44,6 +44,8 @@ reset:
   jsr lcd_print_char    ; Print the separator
 
   inw r0                ; Increment word in r0
+  lda #5                ; Load 5 * 10 ms
+  jsr time_sleep        ; Sleep for 50 seconds
   jmp .main             ; Loop over
 
 ; Interrupt
@@ -60,6 +62,7 @@ irq:
 #include "libraries/lcd.asm"
 #include "libraries/rom.asm"
 #include "libraries/time.asm"
+#include "libraries/math.asm"
 #include "libraries/decimal.asm"
 
 ; Reserve data

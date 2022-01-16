@@ -120,4 +120,5 @@ irq:
 #include "libraries/rom.asm"
 #include "libraries/time.asm"
 #include "libraries/uart.asm"
+#include "libraries/math.asm"
 #include "libraries/decimal.asm"

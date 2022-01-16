@@ -49,5 +49,7 @@ irq:
 ; Libraries
 
 #include "libraries/lcd.asm"
+#include "libraries/math.asm"
 #include "libraries/time.asm"
+#include "libraries/decimal.asm"
 

@@ -1,9 +1,10 @@
 
 ; Library for time management
 
+
 TICKS_PER_SEC = 100             ; 100 ticks per second
 LATCH_VALUE = 1843200 / 100 - 2 ; Latch configuration for 100 ticks per second with a 1.8432 clock
-
+SECONDS_IN_12H = 60 * 60 * 12
 
 EVENT_TICK = 0b00000001      ; Mask for for 10 ms tick event
 EVENT_SECOND = 0b00000010    ; Mask for for 1 s tick event
@@ -13,6 +14,8 @@ EVENT_SECOND = 0b00000010    ; Mask for for 1 s tick event
 time_ticks: #res 1
 time_seconds: #res 2
 time_events: #res 1
+hms_buffer: #res 6
+hms_string: #res 9
 
 
 ; Add functions to the program
@@ -21,33 +24,42 @@ time_events: #res 1
 
 ; Time interrupt
 time_irq:
-  pha                ; Push A onto the stack
+  pha                       ; Push A onto the stack
 
-  lda VIA_IFR        ; Load Interrupt Flag Register
-  and #0b01000000    ; Keep timer 1 flag
-  beq .done          ; Not a timer 1 interrupt, we're done
+  lda VIA_IFR               ; Load Interrupt Flag Register
+  and #0b01000000           ; Keep timer 1 flag
+  beq .done                 ; Not a timer 1 interrupt, we're done
 
-  lda time_events    ; Load time events
-  ora #EVENT_TICK    ; Set the tick event
-  sta time_events    ; Save time events
+  lda time_events           ; Load time events
+  ora #EVENT_TICK           ; Set the tick event
+  sta time_events           ; Save time events
 
-  lda VIA_T1C_L      ; Reading T1C_L clears bit 6 in IFR
-  inc time_ticks     ; Increment ticks counter
-  lda time_ticks     ; Load ticks counter
-  cmp #TICKS_PER_SEC ; Compare with TICKS_PER_SEC
-  bne .done          ; Counter is still positive, we're done
+  lda VIA_T1C_L             ; Reading T1C_L clears bit 6 in IFR
+  inc time_ticks            ; Increment ticks counter
+  lda time_ticks            ; Load ticks counter
+  cmp #TICKS_PER_SEC        ; Compare with TICKS_PER_SEC
+  bne .done                 ; Counter is still positive, we're done
 
-  lda #0             ; Load zero
-  sta time_ticks     ; Reset ticks counter
-  inw time_seconds   ; Increment seconds counter
+  lda #0                    ; Load zero
+  sta time_ticks            ; Reset ticks counter
+  inw time_seconds          ; Increment seconds counter
 
-  lda time_events    ; Load time events
-  ora #EVENT_SECOND  ; Set the second event
-  sta time_events    ; Store time events
+  lda time_seconds          ; Load lower byte of seconds counter
+  cmp #SECONDS_IN_12H[7:0]  ; Compare to lower byte of 12 hours
+  bne .done                 ; Continue if equal
+  lda time_seconds + 1      ; Load higher byte of seconds counter
+  cmp #SECONDS_IN_12H[15:8] ; Countinue if equal
+  bne .done                 ; Continue if equal
+
+  wrw #0 time_seconds       ; Reset seconds counter
+
+  lda time_events           ; Load time events
+  ora #EVENT_SECOND         ; Set the second event
+  sta time_events           ; Store time events
 
   .done:
-  pla             ; Restore A register
-  rts
+  pla                       ; Restore A register
+  rts                       ; Return from subroutine
 
 
 ; Initialize timing interrupt
@@ -56,7 +68,7 @@ time_init:
 
 
   wrb #0 time_ticks        ; Load tick value
-  wrw #0 time_seconds      ; Initialize ticks counter
+  wrw #3600*3 + 33 * 60 + 50 time_seconds      ; Initialize ticks counter
 
   lda #0b01000000          ; Continuous interrupts on timer 1
   sta VIA_ACR              ; Write configuration
@@ -65,6 +77,7 @@ time_init:
   sta VIA_IER              ; Write configuration
 
   wrw #LATCH_VALUE VIA_T1C ; Write latch and start timer (when higher bytes is written)
+  lda VIA_T1C_L            ; Reading T1C_L clears bit 6 in IFR
 
   cli                      ; Allow maskable interrupts
 
@@ -81,6 +94,7 @@ time_quit:
 
   lda #0b00000000          ; Disable timer 1
   sta VIA_ACR              ; Write configuration
+  lda VIA_T1C_L            ; Reading T1C_L clears bit 6 in IFR
 
   wrb #0 time_ticks        ; Reset tick value
   wrw #0 time_seconds      ; Reset ticks counter
@@ -143,3 +157,91 @@ time_busy_sleep:
   pla             ; Pull X from the stack
   tax             ; And transfer it
   rts             ; Return
+
+
+; Return the current time as hour, minute and seconds
+time_hours_minutes_seconds:
+  wrw #0 hms_buffer + 0    ; Write 0 in a0
+  wrw #0 hms_buffer + 2    ; Write 0 in a2
+  wrw #0 hms_buffer + 4    ; Write 0 in a4
+
+  wrw time_seconds a0      ; Write seconds to a0
+  clc                      ; Clear carry bit
+  lda #3600[7:0]           ; Load lower byte of 3600
+  adc a0                   ; Add to a0
+  sta a0                   ; And write back
+  lda #3600[15:8]          ; Load higher byte of 3600
+  adc a1                   ; Add to a1
+  sta a1                   ; And write back
+
+  wrw #60 a2               ; Write divisor to a2
+  wrw #hms_buffer a4       ; Write hms buffer address to a2
+  jsr successive_division  ; Perform divisions
+
+  wrw hms_buffer + 0 a4    ; Write seconds in a4
+  wrw hms_buffer + 2 a2    ; Write minutes in a2
+  wrw hms_buffer + 4 a0    ; Write hours in a0
+  rts                      ; Return from subroutine
+
+
+; Return the current time as a string
+time_as_str:
+  lda r0
+  pha
+  lda r1
+  pha
+  lda r2
+  pha
+  lda r3
+  pha
+
+  jsr time_hours_minutes_seconds
+
+  wrw a2 r0
+  wrw a4 r2
+
+  wrw #hms_string a2
+  jsr to_base10
+
+  lda hms_string + 1
+  bne .skip1
+  wrb hms_string + 0 hms_string + 1
+  wrb #"0" hms_string + 0
+  .skip1:
+
+  wrb #":" hms_string + 2
+
+  wrw r0 a0
+  wrw #(hms_string + 3) a2
+  jsr to_base10
+
+  lda hms_string + 4
+  bne .skip2
+  wrb hms_string + 3 hms_string + 4
+  wrb #"0" hms_string + 3
+  .skip2:
+
+  wrb #":" hms_string + 5
+
+  wrw r2 a0
+  wrw #(hms_string + 6) a2
+  jsr to_base10
+
+  lda hms_string + 7
+  bne .skip3
+  wrb hms_string + 6 hms_string + 7
+  wrb #"0" hms_string + 6
+  .skip3:
+
+  wrb #"\0" hms_string + 8
+  wrw #hms_string a0
+
+  pla
+  sta r3
+  pla
+  sta r2
+  pla
+  sta r1
+  pla
+  sta r0
+  rts
