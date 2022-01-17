@@ -153,6 +153,82 @@ time_pop_events:
   rts               ; Return from subroutine
 
 
+; Add seconds in a0-a1 to current time
+time_add_seconds:
+  php                       ; Push processor status on the stack
+  sei                       ; Do not allow interrupt
+
+  clc                       ; Clear carry for addition
+  lda a0                    ; Load argument lower byte
+  adc time_seconds          ; Add current time lower byte
+  sta time_seconds          ; Store result
+  lda a1                    ; Load argument higher byte
+  adc time_seconds + 1      ; Add current time higher byte
+  sta time_seconds + 1      ; Store result
+
+  sec                       ; Prepare carry for subtraction
+  lda time_seconds          ; Load lower byte of seconds counter
+  sbc #SECONDS_IN_12H[7:0]  ; Subtract to lower byte of 12 hours
+  sta s0                    ; Store in s0
+  lda time_seconds + 1      ; Load higher byte of seconds counter
+  sbc #SECONDS_IN_12H[15:8] ; Subtract to higher byte of 12 hours
+  sta s1                    ; Store in s1
+  bcc .done                 ; Continue if negative
+  wrw s0 time_seconds       ; Write new value
+
+  .done:
+  plp                       ; Restore processor status
+  rts                       ; Return from subroutine
+
+
+; Subtract seconds in a0-a1 to current time
+time_sub_seconds:
+  php                       ; Push processor status on the stack
+  sei                       ; Do not allow interrupt
+
+  sec                       ; Prepare carry for subtraction
+  lda time_seconds          ; Load current time lower byte
+  sbc a0                    ; Subtract argument lower byte
+  sta time_seconds          ; Store result
+  lda time_seconds + 1      ; Load current time higher byte
+  sbc a1                    ; Subtract argument higher byte
+  sta time_seconds + 1      ; Store result
+  bcs .done                 ; Done if positive
+
+  clc                       ; Prepare carry for addition
+  lda time_seconds          ; Load lower byte of seconds counter
+  adc #SECONDS_IN_12H[7:0]  ; Add to lower byte of 12 hours
+  sta time_seconds          ; Store in s0
+  lda time_seconds + 1      ; Load higher byte of seconds counter
+  adc #SECONDS_IN_12H[15:8] ; Add to higher byte of 12 hours
+  sta time_seconds + 1      ; Store in s1
+
+  .done:
+  plp                       ; Restore processor status
+  rts                       ; Return from subroutine
+
+
+; Synchronize to the closest second
+time_sync:
+  php                       ; Push processor status on the stack
+  sei                       ; Do not allow interrupt
+
+  lda time_ticks            ; Load current ticks
+  cmp TICKS_PER_SEC / 2     ; Compare to half range
+  bpl .round_down           ; Round down
+
+  .round_up:
+  wrb #99 time_ticks        ; Increment second at the next tick
+  jmp .done                 ; We're done
+
+  .round_down:
+  wrb #0 time_ticks         ; Reset current second
+
+  .done:
+  plp                       ; Restore processor status
+  rts                       ; Return from subroutine
+
+
 ; Sleep for A times 10 ms without using interrupts
 time_busy_sleep:
   sta s0          ; Store A in s0
