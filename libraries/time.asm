@@ -7,13 +7,20 @@ LATCH_VALUE = 1843200 / 100 - 2 ; Latch configuration for 100 ticks per second w
 SECONDS_IN_12H = 60 * 60 * 12
 
 EVENT_TICK = 0b00000001      ; Mask for for 10 ms tick event
-EVENT_SECOND = 0b00000010    ; Mask for for 1 s tick event
+EVENT_SECOND = 0b00100000    ; Mask for for 1 s tick event
 
-; Allocate a buffer for division in the ram
+EVENT_LEFT = 0b00000010
+EVENT_UP = 0b00001000
+EVENT_DOWN = 0b00000100
+EVENT_RIGHT = 0b00010000
+
+
+; Allocate buffers and counters in RAM
 #bank ram
 time_ticks: #res 1
 time_seconds: #res 2
 time_events: #res 1
+time_keys: #res 1
 hms_buffer: #res 6
 hms_string: #res 9
 
@@ -25,14 +32,25 @@ hms_string: #res 9
 ; Time interrupt
 time_irq:
   pha                       ; Push A onto the stack
+  lda s0                    ; Load s0
+  pha                       ; Push it onto the stack
 
   lda VIA_IFR               ; Load Interrupt Flag Register
   and #0b01000000           ; Keep timer 1 flag
   beq .done                 ; Not a timer 1 interrupt, we're done
 
-  lda time_events           ; Load time events
+  lda PORTA                 ; Read PORTA
+  and #0b00011110           ; Only keep the relevant bits
+  sta s0                    ; Save in s0
+
+  lda time_keys             ; Load keys state
+  eor s0                    ; Check difference
+  and time_keys             ; Only keep press events
+  ora time_events           ; Keep older events
   ora #EVENT_TICK           ; Set the tick event
-  sta time_events           ; Save time events
+  sta time_events           ; Store in keys event
+
+  wrb s0 time_keys          ; Save s0 for later tick
 
   lda VIA_T1C_L             ; Reading T1C_L clears bit 6 in IFR
   inc time_ticks            ; Increment ticks counter
@@ -44,6 +62,10 @@ time_irq:
   sta time_ticks            ; Reset ticks counter
   inw time_seconds          ; Increment seconds counter
 
+  lda time_events           ; Load time events
+  ora #EVENT_SECOND         ; Set the second event
+  sta time_events           ; Store time events
+
   lda time_seconds          ; Load lower byte of seconds counter
   cmp #SECONDS_IN_12H[7:0]  ; Compare to lower byte of 12 hours
   bne .done                 ; Continue if equal
@@ -53,11 +75,9 @@ time_irq:
 
   wrw #0 time_seconds       ; Reset seconds counter
 
-  lda time_events           ; Load time events
-  ora #EVENT_SECOND         ; Set the second event
-  sta time_events           ; Store time events
-
   .done:
+  pla                       ; Restore s0 from stack
+  sta s0                    ; Save it
   pla                       ; Restore A register
   rts                       ; Return from subroutine
 
@@ -65,15 +85,16 @@ time_irq:
 ; Initialize timing interrupt
 time_init:
   pha                      ; Push A onto the stack
-
+  sei                      ; Do not allow interrupt
 
   wrb #0 time_ticks        ; Load tick value
-  wrw #3600*3 + 33 * 60 + 50 time_seconds      ; Initialize ticks counter
+  wrw #0 time_seconds      ; Initialize ticks counter
 
   lda #0b01000000          ; Continuous interrupts on timer 1
   sta VIA_ACR              ; Write configuration
 
-  lda #0b11000000          ; Enable interrupt on timer 1
+  lda VIA_IER              ; Load IER configuration
+  ora #0b11000000          ; Enable interrupt on timer 1
   sta VIA_IER              ; Write configuration
 
   wrw #LATCH_VALUE VIA_T1C ; Write latch and start timer (when higher bytes is written)
@@ -165,7 +186,11 @@ time_hours_minutes_seconds:
   wrw #0 hms_buffer + 2    ; Write 0 in a2
   wrw #0 hms_buffer + 4    ; Write 0 in a4
 
+  php                      ; Push processor status on the stack
+  sei                      ; Do not allow interrupt
   wrw time_seconds a0      ; Write seconds to a0
+  plp                      ; Restore processor status
+
   clc                      ; Clear carry bit
   lda #3600[7:0]           ; Load lower byte of 3600
   adc a0                   ; Add to a0
