@@ -1,4 +1,5 @@
 ; Library serial communication using the UART chip
+#once
 
 ; UART registers
 

@@ -1,4 +1,5 @@
 ; Library for generating randomness
+#once
 
 
 ; Allocate globals for the RNG

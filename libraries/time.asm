@@ -1,5 +1,7 @@
-
 ; Library for time management
+#once
+#include "./math.asm"
+#include "./decimal.asm"
 
 
 TICKS_PER_SEC = 100             ; 100 ticks per second

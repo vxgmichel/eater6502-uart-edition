@@ -1,4 +1,6 @@
 ; Library for decimal conversion
+#once
+#include "./math.asm"
 
 
 ; Allocate a buffer for division in the ram

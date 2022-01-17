@@ -74,5 +74,4 @@ irq:
 
 #include "libraries/lcd.asm"
 #include "libraries/uart.asm"
-#include "libraries/math.asm"
 #include "libraries/decimal.asm"

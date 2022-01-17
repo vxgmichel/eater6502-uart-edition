@@ -1,4 +1,5 @@
 ; Library for maths helpers
+#once
 
 
 ; Add functions to the program

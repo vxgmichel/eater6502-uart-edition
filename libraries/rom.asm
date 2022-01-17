@@ -1,4 +1,5 @@
 ; Library for writing to the ROM
+#once
 
 
 ; Add _rom_write body to the program

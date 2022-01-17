@@ -1,4 +1,5 @@
 ; Library for controlling the LCD
+#once
 
 
 ; LCD constants
