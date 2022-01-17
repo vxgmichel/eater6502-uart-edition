@@ -207,6 +207,10 @@ Note that the RNG algorithm uses an [4261412736-cycle xorshift algorithm](https:
     customasm bootupdater.asm && cat bootupdater.bin | ./scripts/tty.sh 4096
     customasm bootloader.asm && cat bootloader.bin | ./scripts/tty.sh 32768
     ```
+- [clock.asm](./clock.asm): A 12-hour clock, configurable with key presses
+    ```bash
+    customasm clock.asm && cat clock.bin | ./scripts/tty.sh 4096
+    ```
 
 ## The greasy details
 
