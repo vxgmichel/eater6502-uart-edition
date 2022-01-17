@@ -118,6 +118,7 @@ lcd_instruction:
   sta PORTA      ; Using port A
   rts            ; Return from subroutine
 
+
 ; Print the character in the accumulator to the LCD display
 lcd_print_char:
   jsr lcd_wait    ; Wait for the display to be ready
@@ -164,9 +165,47 @@ lcd_print_str:
   rts                   ; Return
 
 
+; Move cursor left
+lcd_move_left:
+  jsr lcd_wait        ; Wait for the display to be ready
+  lda #0b00010000     ; Prepare command
+  jsr lcd_instruction ; Move curor to the left
+  rts                 ; Return from subroutine
+
+
+; Move cursor right
+lcd_move_right:
+  jsr lcd_wait        ; Wait for the display to be ready
+  lda #0b00010100     ; Prepare command
+  jsr lcd_instruction ; Move curor to the right
+  rts                 ; Return from subroutine
+
+
+; Move cursor to position
+lcd_seek:
+  jsr lcd_wait          ; Wait for the display to be ready
+  ora #0b10000000       ; Set command
+  jsr lcd_instruction   ; Move cursor
+  rts                   ; Return from subroutine
+
+
+lcd_blink_on:
+  jsr lcd_wait          ; Wait for the display to be ready
+  lda #0b00001101       ; Load blinking cursor configuration
+  jsr lcd_instruction   ; Write instruction
+  rts                   ; Return from subroutine
+
+
+lcd_blink_off:
+  jsr lcd_wait          ; Wait for the display to be ready
+  lda #0b00001100       ; Load blinking cursor configuration
+  jsr lcd_instruction   ; Write instruction
+  rts                   ; Return from subroutine
+
+
 ; Delete a character from the LCD display
 lcd_del_char:
-  jsr lcd_wait        ; Get cursor position (once the display is ready)
+  jsr lcd_wait        ; Wait for the display to be ready
 
   lda #0b00010000     ; Prepare command
   jsr lcd_instruction ; Move curor to the left
