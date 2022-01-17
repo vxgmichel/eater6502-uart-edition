@@ -137,37 +137,22 @@ time_as_str:
   wrw a4 r2
 
   wrw #hms_string a2
-  jsr to_base10
-
-  lda hms_string + 1
-  bne .skip1
-  wrb hms_string + 0 hms_string + 1
-  wrb #"0" hms_string + 0
-  .skip1:
+  lda #2
+  jsr to_base10_zero_padding
 
   wrb #":" hms_string + 2
 
   wrw r0 a0
   wrw #(hms_string + 3) a2
-  jsr to_base10
-
-  lda hms_string + 4
-  bne .skip2
-  wrb hms_string + 3 hms_string + 4
-  wrb #"0" hms_string + 3
-  .skip2:
+  lda #2
+  jsr to_base10_zero_padding
 
   wrb #":" hms_string + 5
 
   wrw r2 a0
   wrw #(hms_string + 6) a2
-  jsr to_base10
-
-  lda hms_string + 7
-  bne .skip3
-  wrb hms_string + 6 hms_string + 7
-  wrb #"0" hms_string + 6
-  .skip3:
+  lda #2
+  jsr to_base10_zero_padding
 
   wrb #"\0" hms_string + 8
   wrw #hms_string a0
