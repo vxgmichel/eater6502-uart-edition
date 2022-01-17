@@ -40,7 +40,8 @@ lcd_init:
   jsr lcd_instruction      ; ...
   lda #0b00000110          ; Increment and shift cursor; don't shift display
   jsr lcd_instruction      ; ...
-  rts
+  jsr lcd_clear            ; Clear display
+  rts                      ; Return from subroutine
 
 lcd_print_num:
   sta s0              ; Save argument in s0

@@ -14,8 +14,8 @@ string_buffer: #res 256
 #bank program
 
 reset:
-  jsr lcd_init          ; Init LCD
-  jsr time_init         ; Init time
+  jsr lcd_init          ; Init LCD display
+  jsr event_init        ; Init event module
 
   jsr update_display    ; Show time on the LCD
   lda #4                ; Move cursor
@@ -24,7 +24,7 @@ reset:
 
   .main:                ; Event loop
 
-  jsr time_pop_events   ; Pop events
+  jsr event_pop         ; Pop events
   sta r0                ; Store in r0
 
   lda r0                ; Load events
@@ -285,7 +285,7 @@ nmi:
   rti
 
 irq:
-  jsr time_irq
+  jsr event_irq
   rti
 
 ; Libraries
@@ -293,3 +293,4 @@ irq:
 #include "libraries/lcd.asm"
 #include "libraries/rom.asm"
 #include "libraries/time.asm"
+#include "libraries/event.asm"

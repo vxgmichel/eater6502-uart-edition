@@ -8,36 +8,32 @@
 #bank program
 
 reset:
-  ; Init LCD
-  jsr lcd_init
-  jsr lcd_clear
 
-  ; Blinking cursor
-  lda #0b00001101
-  jsr lcd_instruction
-
-  ; Configure UART
-  jsr uart_init
+  jsr lcd_init         ; Init LCD display
+  jsr lcd_blink_on     ; Blinking cursor
+  jsr uart_init        ; Configure UART
 
   .main:
-  jsr uart_read_one
-  cmp #0x7f
-  beq .del_char
-  cmp #"\r"
-  beq .new_line
-  .print_char:
-  jsr lcd_print_char
-  jmp .done
-  .del_char:
-  jsr lcd_del_char
-  jmp .done
-  .new_line:
-  jsr lcd_new_line
-  jmp .done
+  jsr uart_read_one    ; Read one byte from UART
+  cmp #0x7f            ; Compare to DEL
+  beq .del_char        ; Delete char handler
+  cmp #"\r"            ; Compare to \r
+  beq .new_line        ; New line handler
 
-  ; Loop forever
+  .print_char:
+  jsr lcd_print_char   ; Print character
+  jmp .done            ; We're done
+
+  .del_char:
+  jsr lcd_del_char     ; Delete character
+  jmp .done            ; We're done
+
+  .new_line:
+  jsr lcd_new_line     ; Go to next line
+  jmp .done            ; We're done
+
   .done:
-  jmp .main
+  jmp .main            ; Loop forever
 
 ; Interrupt
 

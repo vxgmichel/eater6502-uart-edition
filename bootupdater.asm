@@ -20,7 +20,6 @@ reset:
 
   jsr uart_init            ; Configure UART receiver
   jsr lcd_init             ; Initialize the LCD display
-  jsr lcd_clear            ; Clear LCD display
 
   wrw #ready_str a0        ; Load ready string address to a0-a1
   jsr lcd_print_str        ; Print ready string
@@ -28,7 +27,7 @@ reset:
   jsr lcd_instruction      ; Write instruction
 
   lda #2                   ; Wait 20 ms
-  jsr time_busy_sleep      ; for the ROM write protection to fade out
+  jsr busy_sleep           ; for the ROM write protection to fade out
 
   wrw #0x8000 r0           ; Load address 0x8000 to r0-r1
   ldx #0x80                ; Loop over 128 pages
@@ -81,7 +80,7 @@ reset:
   jsr lcd_print_str        ; Print complete_str to LCD display
 
   lda #50                  ; Load 50 * 10 ms
-  jsr time_busy_sleep      ; Sleep for 0.5 seconds
+  jsr busy_sleep           ; Sleep for 0.5 seconds
 
   .done:
   jmp (boot_reset)         ; Jump to bootloader reset
@@ -118,6 +117,6 @@ irq:
 
 #include "libraries/lcd.asm"
 #include "libraries/rom.asm"
-#include "libraries/time.asm"
 #include "libraries/uart.asm"
+#include "libraries/util.asm"
 #include "libraries/decimal.asm"

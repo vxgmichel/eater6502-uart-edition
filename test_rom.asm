@@ -14,12 +14,11 @@ string_buffer: #res 256
 
 reset:
 
-  jsr lcd_init          ; Init LCD
-  jsr lcd_clear         ; Clear lCD
-  jsr time_init         ; Init time module
+  jsr lcd_init          ; Init LCD display
+  jsr event_init        ; Init event module
 
   lda #2                ; Wait 20 ms
-  jsr time_sleep        ; for the ROM write protection to fade out
+  jsr event_sleep        ; for the ROM write protection to fade out
 
   wrw #0x0000 r0        ; Load 0 in word r0
 
@@ -45,7 +44,7 @@ reset:
 
   inw r0                ; Increment word in r0
   lda #5                ; Load 5 * 10 ms
-  jsr time_sleep        ; Sleep for 50 seconds
+  jsr event_sleep       ; Sleep for 50 seconds
   jmp .main             ; Loop over
 
 ; Interrupt
@@ -54,14 +53,14 @@ nmi:
   rti
 
 irq:
-  jsr time_irq
+  jsr event_irq
   rti
 
 ; Libraries
 
 #include "libraries/lcd.asm"
 #include "libraries/rom.asm"
-#include "libraries/time.asm"
+#include "libraries/event.asm"
 #include "libraries/decimal.asm"
 
 ; Reserve data

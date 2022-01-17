@@ -14,7 +14,7 @@ reset:
 
   jsr rng_init       ; Initialize the RNG
   jsr lcd_init       ; Initialize the LCD display
-  jsr time_init      ; Initialize the time module
+  jsr event_init     ; Initialize the event module
 
   .main:
   jsr lcd_clear      ; Clear the LCD display
@@ -32,7 +32,7 @@ reset:
   lda rng_a          ; Get the current random value
   jsr lcd_print_num  ; Print it
   lda #100           ; Load 100 * 10 ms
-  jsr time_sleep     ; Sleep for 1 second
+  jsr event_sleep    ; Sleep for 1 second
   jmp .main          ; Loop over
 
 
@@ -49,7 +49,7 @@ nmi:
   rti
 
 irq:
-  jsr time_irq
+  jsr event_irq
   rti
 
 
@@ -57,5 +57,5 @@ irq:
 
 #include "libraries/lcd.asm"
 #include "libraries/rng.asm"
-#include "libraries/time.asm"
+#include "libraries/event.asm"
 

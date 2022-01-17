@@ -24,7 +24,6 @@ reset:
   wrw #0 r0
 
   ; Write 0 to LCD display
-  jsr lcd_clear
   lda #"0"
   jsr lcd_print_char
 
