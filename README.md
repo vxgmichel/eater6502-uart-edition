@@ -115,10 +115,10 @@ The bootloader program is assembled using the latest version of [customasm](http
 # Install rust and cargo
 $ curl https://sh.rustup.rs -sSf | sh
 # Install customasm
-$ cargo install customasm
+$ cargo install --git http://github.com/hlorenzi/customasm
 # Assemble the bootloader program
 $ customasm bootloader.asm
-customasm v0.11.12 (x86_64-unknown-linux-gnu)
+customasm v0.11.13 (x86_64-unknown-linux-gnu)
 assembling `bootloader.asm`...
 writing `bootloader.bin`...
 success after 2 iterations
@@ -143,7 +143,7 @@ If `PA1` is **not** pressed, the boot program runs the current subprogram. At th
 First choose and assemble a subprogram, e.g `random.asm`:
 ```bash
 $ customasm random.asm
-customasm v0.11.12 (x86_64-unknown-linux-gnu)
+customasm v0.11.13 (x86_64-unknown-linux-gnu)
 assembling `random.asm`...
 writing `random.bin`...
 success after 2 iterations
