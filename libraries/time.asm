@@ -36,7 +36,9 @@ time_add_seconds:
   sbc #SECONDS_IN_12H[15:8] ; Subtract to higher byte of 12 hours
   sta s1                    ; Store in s1
   bcc .done                 ; Continue if negative
+
   wrw s0 event_seconds      ; Write new value
+  inc event_halfdays        ; Increment halfday counter
 
   .done:
   plp                       ; Restore processor status
@@ -64,6 +66,7 @@ time_sub_seconds:
   lda event_seconds + 1     ; Load higher byte of seconds counter
   adc #SECONDS_IN_12H[15:8] ; Add to higher byte of 12 hours
   sta event_seconds + 1     ; Store in s1
+  dec event_halfdays        ; Decrement halfday counter
 
   .done:
   plp                       ; Restore processor status
@@ -93,6 +96,9 @@ time_sync:
 
 ; Return the current time as hour, minute and seconds
 time_hours_minutes_seconds:
+  lda r0                   ; Push r0
+  pha                      ; Onto the stack
+
   wrw #0 hms_buffer + 0    ; Write 0 in a0
   wrw #0 hms_buffer + 2    ; Write 0 in a2
   wrw #0 hms_buffer + 4    ; Write 0 in a4
@@ -100,15 +106,8 @@ time_hours_minutes_seconds:
   php                      ; Push processor status on the stack
   sei                      ; Do not allow interrupt
   wrw event_seconds a0     ; Write seconds to a0
+  wrb event_halfdays r0    ; Write halfdays to r0
   plp                      ; Restore processor status
-
-  clc                      ; Clear carry bit
-  lda #3600[7:0]           ; Load lower byte of 3600
-  adc a0                   ; Add to a0
-  sta a0                   ; And write back
-  lda #3600[15:8]          ; Load higher byte of 3600
-  adc a1                   ; Add to a1
-  sta a1                   ; And write back
 
   wrw #60 a2               ; Write divisor to a2
   wrw #hms_buffer a4       ; Write hms buffer address to a2
@@ -117,6 +116,18 @@ time_hours_minutes_seconds:
   wrw hms_buffer + 0 a4    ; Write seconds in a4
   wrw hms_buffer + 2 a2    ; Write minutes in a2
   wrw hms_buffer + 4 a0    ; Write hours in a0
+
+  lda event_halfdays       ; Load half days
+  lsr a                    ; Shift left
+  bcc .halfday_done        ; Done if carry clear
+  clc                      ; Prepare addition
+  lda a0                   ; Load a0
+  adc #12                  ; Add 12
+  sta a0                   ; Write back
+  .halfday_done:
+
+  pla                      ; Pull r0
+  sta r0                   ; From the stack
   rts                      ; Return from subroutine
 
 

@@ -1,5 +1,19 @@
 ; Subprogram for a 12-hour clock
-; Can be configured using key presses
+; Can be configured using key presses.
+;
+; Up/Down keys are used to increment/decrement
+; while Left/Right keys loop over the following position:
+; - Tens of hours:    +/- 4 hours
+; - Hours:            +/- 1 hour
+; - Tens of minutes:  +/- 10 minutes
+; - Minutes:          +/- 1 minute
+; - Tens of seconds:  +/- 10 seconds
+; - Seconds:          +/- 1 second
+; - Hidden cursor
+;
+; On hidden cursor position:
+; - Up key synchronizes the ticking
+; - Down key synchronizes the ticking
 
 #include "layouts/subeater.asm"
 
@@ -83,7 +97,7 @@ on_up:
     jmp .done             ; We're done
 
   .ten_hours:
-    wrw #6*3600 a0        ; Add 6 hours
+    wrw #4*3600 a0        ; Add 4 hours
     jsr time_add_seconds  ; to current time
     jmp .done             ; We're done
 
@@ -140,7 +154,7 @@ on_down:
     jmp .done             ; We're done
 
   .ten_hours:
-    wrw #6*3600 a0        ; Subtract 6 hours
+    wrw #4*3600 a0        ; Subtract 4 hours
     jsr time_sub_seconds  ; to current time
     jmp .done             ; We're done
 
