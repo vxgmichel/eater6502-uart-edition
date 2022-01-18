@@ -75,23 +75,23 @@ time_sub_seconds:
 
 ; Synchronize to the closest second
 time_sync:
-  php                       ; Push processor status on the stack
-  sei                       ; Do not allow interrupt
+  php                              ; Push processor status on the stack
+  sei                              ; Do not allow interrupt
 
-  lda event_ticks           ; Load current ticks
-  cmp TICKS_PER_SEC / 2     ; Compare to half range
-  bpl .round_down           ; Round down
+  lda event_ticks                  ; Load current ticks
+  cmp #TICKS_PER_SEC/2             ; Compare to half range
+  bmi .round_down                  ; Round down
 
   .round_up:
-  wrb #99 event_ticks       ; Increment second at the next tick
-  jmp .done                 ; We're done
+  wrb #TICKS_PER_SEC-1 event_ticks ; Increment second at the next tick
+  jmp .done                        ; We're done
 
   .round_down:
-  wrb #0 event_ticks        ; Reset current second
+  wrb #0 event_ticks               ; Reset current second
 
   .done:
-  plp                       ; Restore processor status
-  rts                       ; Return from subroutine
+  plp                              ; Restore processor status
+  rts                              ; Return from subroutine
 
 
 ; Return the current time as hour, minute and seconds
@@ -131,49 +131,93 @@ time_hours_minutes_seconds:
   rts                      ; Return from subroutine
 
 
-; Return the current time as a string
-time_as_str:
-  lda r0
-  pha
-  lda r1
-  pha
-  lda r2
-  pha
-  lda r3
-  pha
+; Convert hour-minute-second time to string
+time_hms_to_str:
+  lda r0                        ; Push r0
+  pha                           ; Onto the stack
+  lda r1                        ; Push r1
+  pha                           ; Onto the stack
+  lda r2                        ; Push r2
+  pha                           ; Onto the stack
+  lda r3                        ; Push r3
+  pha                           ; Onto the stack
 
-  jsr time_hours_minutes_seconds
+  wrw a2 r0                     ; Write minutes word to r0
+  wrw a4 r2                     ; Write seconds word to r2
 
-  wrw a2 r0
-  wrw a4 r2
+  wrw #hms_string a2            ; Write string address to a2
+  lda #2                        ; Pad 2 characters with zeros
+  jsr to_base10_zero_padding    ; Convert hours to base 10
 
-  wrw #hms_string a2
-  lda #2
-  jsr to_base10_zero_padding
+  wrb #":" hms_string + 2       ; Write a column
 
-  wrb #":" hms_string + 2
+  wrw r0 a0                     ; Write minutes word to a0
+  wrw #(hms_string + 3) a2      ; Write string address with offset to a2
+  lda #2                        ; Pad 2 characters with zeros
+  jsr to_base10_zero_padding    ; Convert minutes to base 10
 
-  wrw r0 a0
-  wrw #(hms_string + 3) a2
-  lda #2
-  jsr to_base10_zero_padding
+  wrb #":" hms_string + 5       ; Write a column
 
-  wrb #":" hms_string + 5
+  wrw r2 a0                     ; Write seconds word to a0
+  wrw #(hms_string + 6) a2      ; Write string address with offset to a2
+  lda #2                        ; Pad 2 characters with zeros
+  jsr to_base10_zero_padding    ; Convert seconds to base 10
 
-  wrw r2 a0
-  wrw #(hms_string + 6) a2
-  lda #2
-  jsr to_base10_zero_padding
+  wrb #"\0" hms_string + 8      ; Write null byte at the end of the string
+  wrw #hms_string a0            ; Write buffer address to a0
 
-  wrb #"\0" hms_string + 8
-  wrw #hms_string a0
+  pla                           ; Pull r3
+  sta r3                        ; From the stack
+  pla                           ; Pull r2
+  sta r2                        ; From the stack
+  pla                           ; Pull r1
+  sta r1                        ; From the stack
+  pla                           ; Pull r0
+  sta r0                        ; From the stack
+  rts                           ; Return from subroutine
 
-  pla
-  sta r3
-  pla
-  sta r2
-  pla
-  sta r1
-  pla
-  sta r0
-  rts
+
+; Return the current 24-hour time as a string address in a0 word
+time_24_hour_str:
+  jsr time_hours_minutes_seconds ; Get current time
+  jsr time_hms_to_str            ; Convert to string
+  rts                            ; Return from subroutine
+
+
+; Return the current 12-hour time as two string addresses in a0 and a1 words
+time_12_hour_str:
+  jsr time_hours_minutes_seconds ; Get current time
+
+  sec                            ; Prepare substraction
+  lda a0                         ; Load hours
+  sbc #12                        ; Subtract 12
+  php                            ; Push status for later use
+
+  bmi .skip1                     ; Test AM/PM
+  sta a0                         ; Write back if positive or zero
+  .skip1:
+
+  lda a0                         ; Load hours
+  bne .skip2                     ; Skip if not zero
+  lda #12                        ; Replace zero hours
+  sta a0                         ; With 12 hours
+  .skip2:
+
+  jsr time_hms_to_str            ; Convert to string
+
+  plp                            ; Get previous comparison status
+  bpl .pm                        ; Test AM/PM
+  .am:
+  wrw #AM_STRING a2              ; Load AM string
+  jmp .done                      ; We're done
+  .pm:
+  wrw #PM_STRING a2              ; Load PM string
+  .done:
+
+  rts                            ; Return from subroutine
+
+
+; AM/PM strings
+
+AM_STRING: #d "AM\0"
+PM_STRING: #d "PM\0"
