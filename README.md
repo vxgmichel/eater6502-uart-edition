@@ -214,7 +214,7 @@ Note that the RNG algorithm uses an [4261412736-cycle xorshift algorithm](https:
 
 ## The greasy details
 
-Writing the EEPROM is not as simple as it seems. There's a reason why this chip is different from the RAM: it is persistent yes, but it also take much more time to write it. Data can be written to the EEPROM in bulks of 64 bytes using the following procedure:
+Writing the EEPROM is not as simple as it seems. There's a reason why this chip is different from the RAM: it is persistent yes, but it also takes much more time to write to it. Data can be written to the EEPROM in bulks of 64 bytes using the following procedure:
 - Write `0xaa` at address `0x5555`
 - Write `0x55` at address `0x2aaa`
 - Write `0xa0` at address `0x5555`
