@@ -52,7 +52,7 @@ rng_step:
   sta rng_a       ; Store in a
 
   lda rng_z       ; Load z
-  lsr a           ; Sift it right
+  lsr a           ; Shift it right
   eor rng_a       ; XOR with a
   sta rng_a       ; Store in a
 

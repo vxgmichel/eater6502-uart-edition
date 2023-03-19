@@ -21,7 +21,6 @@
 ; Allocate a string buffer
 
 #bank ram
-string_buffer: #res 256
 time_mode: #res 1
 
 MODE_24 = 0
@@ -224,7 +223,7 @@ on_left:
   lda #0
   jsr lcd_seek
   jsr lcd_blink_off
-  jmp.done
+  jmp .done
 
   .move_twice:
   jsr lcd_move_left
@@ -263,7 +262,7 @@ on_right:
   lda #0
   jsr lcd_seek
   jsr lcd_blink_off
-  jmp.done
+  jmp .done
 
   .move_twice:
   jsr lcd_move_right

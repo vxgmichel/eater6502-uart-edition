@@ -103,9 +103,9 @@ The original memory map is left mostly unchanged, except for the insertion of th
 
 Several memory layouts for different usage are defined in the following files:
 - [layouts/eater.asm](./layouts/eater.asm): The original memory layout
-- [layouts/rameater.asm](./layouts/eater.asm): A memory layout where the program is copied to the ram before being jumped to run
-- [layouts/subeater.asm](./layouts/eater.asm): The memory layout dedicated to the execution of subprograms
-- [layouts/booteater.asm](./layouts/eater.asm): The memory layout used by the bootloader program
+- [layouts/rameater.asm](./layouts/rameater.asm): A memory layout where the program is copied to the ram before being jumped to run
+- [layouts/subeater.asm](./layouts/subeater.asm): The memory layout dedicated to the execution of subprograms
+- [layouts/booteater.asm](./layouts/booteater.asm): The memory layout used by the bootloader program
 
 
 ## The bootloader program
